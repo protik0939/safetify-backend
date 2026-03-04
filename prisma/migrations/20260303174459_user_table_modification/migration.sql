@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "user" ADD COLUMN     "accountStatus" TEXT NOT NULL DEFAULT 'ACTIVE',
+ADD COLUMN     "deletedAt" TIMESTAMP(3),
+ADD COLUMN     "role" TEXT NOT NULL DEFAULT 'USER';

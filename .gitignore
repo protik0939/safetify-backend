@@ -3,3 +3,4 @@ node_modules
 .evn.*
 !.env.example
 dist
+/src/generate
