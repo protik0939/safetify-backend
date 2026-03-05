@@ -23,6 +23,7 @@ const registerUser = async (payload: IRegisterUser) => {
   //     await tx.user.
   // });
 
+  console.log("Registration data:", data);
   return data;
 };
 
@@ -56,6 +57,7 @@ const loginUser = async (payload: ILoginUser) => {
     throw new Error("User account deletion is pending");
   }
 
+  console.log("Login data:", data);
   return data;
 };
 

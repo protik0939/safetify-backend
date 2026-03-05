@@ -28,7 +28,6 @@ export type SecurityPersonnelProfileMinAggregateOutputType = {
   id: string | null
   userId: string | null
   address: string | null
-  avatarUrl: string | null
   rank: $Enums.PoliceRank | null
   bloodGroup: $Enums.BloodGroup | null
   createdAt: Date | null
@@ -39,7 +38,6 @@ export type SecurityPersonnelProfileMaxAggregateOutputType = {
   id: string | null
   userId: string | null
   address: string | null
-  avatarUrl: string | null
   rank: $Enums.PoliceRank | null
   bloodGroup: $Enums.BloodGroup | null
   createdAt: Date | null
@@ -50,7 +48,6 @@ export type SecurityPersonnelProfileCountAggregateOutputType = {
   id: number
   userId: number
   address: number
-  avatarUrl: number
   rank: number
   bloodGroup: number
   createdAt: number
@@ -63,7 +60,6 @@ export type SecurityPersonnelProfileMinAggregateInputType = {
   id?: true
   userId?: true
   address?: true
-  avatarUrl?: true
   rank?: true
   bloodGroup?: true
   createdAt?: true
@@ -74,7 +70,6 @@ export type SecurityPersonnelProfileMaxAggregateInputType = {
   id?: true
   userId?: true
   address?: true
-  avatarUrl?: true
   rank?: true
   bloodGroup?: true
   createdAt?: true
@@ -85,7 +80,6 @@ export type SecurityPersonnelProfileCountAggregateInputType = {
   id?: true
   userId?: true
   address?: true
-  avatarUrl?: true
   rank?: true
   bloodGroup?: true
   createdAt?: true
@@ -169,7 +163,6 @@ export type SecurityPersonnelProfileGroupByOutputType = {
   id: string
   userId: string
   address: string | null
-  avatarUrl: string | null
   rank: $Enums.PoliceRank | null
   bloodGroup: $Enums.BloodGroup | null
   createdAt: Date
@@ -201,7 +194,6 @@ export type SecurityPersonnelProfileWhereInput = {
   id?: Prisma.StringFilter<"SecurityPersonnelProfile"> | string
   userId?: Prisma.StringFilter<"SecurityPersonnelProfile"> | string
   address?: Prisma.StringNullableFilter<"SecurityPersonnelProfile"> | string | null
-  avatarUrl?: Prisma.StringNullableFilter<"SecurityPersonnelProfile"> | string | null
   rank?: Prisma.EnumPoliceRankNullableFilter<"SecurityPersonnelProfile"> | $Enums.PoliceRank | null
   bloodGroup?: Prisma.EnumBloodGroupNullableFilter<"SecurityPersonnelProfile"> | $Enums.BloodGroup | null
   createdAt?: Prisma.DateTimeFilter<"SecurityPersonnelProfile"> | Date | string
@@ -213,7 +205,6 @@ export type SecurityPersonnelProfileOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
-  avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   rank?: Prisma.SortOrderInput | Prisma.SortOrder
   bloodGroup?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -228,7 +219,6 @@ export type SecurityPersonnelProfileWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.SecurityPersonnelProfileWhereInput[]
   NOT?: Prisma.SecurityPersonnelProfileWhereInput | Prisma.SecurityPersonnelProfileWhereInput[]
   address?: Prisma.StringNullableFilter<"SecurityPersonnelProfile"> | string | null
-  avatarUrl?: Prisma.StringNullableFilter<"SecurityPersonnelProfile"> | string | null
   rank?: Prisma.EnumPoliceRankNullableFilter<"SecurityPersonnelProfile"> | $Enums.PoliceRank | null
   bloodGroup?: Prisma.EnumBloodGroupNullableFilter<"SecurityPersonnelProfile"> | $Enums.BloodGroup | null
   createdAt?: Prisma.DateTimeFilter<"SecurityPersonnelProfile"> | Date | string
@@ -240,7 +230,6 @@ export type SecurityPersonnelProfileOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
-  avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   rank?: Prisma.SortOrderInput | Prisma.SortOrder
   bloodGroup?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -257,7 +246,6 @@ export type SecurityPersonnelProfileScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"SecurityPersonnelProfile"> | string
   userId?: Prisma.StringWithAggregatesFilter<"SecurityPersonnelProfile"> | string
   address?: Prisma.StringNullableWithAggregatesFilter<"SecurityPersonnelProfile"> | string | null
-  avatarUrl?: Prisma.StringNullableWithAggregatesFilter<"SecurityPersonnelProfile"> | string | null
   rank?: Prisma.EnumPoliceRankNullableWithAggregatesFilter<"SecurityPersonnelProfile"> | $Enums.PoliceRank | null
   bloodGroup?: Prisma.EnumBloodGroupNullableWithAggregatesFilter<"SecurityPersonnelProfile"> | $Enums.BloodGroup | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"SecurityPersonnelProfile"> | Date | string
@@ -267,7 +255,6 @@ export type SecurityPersonnelProfileScalarWhereWithAggregatesInput = {
 export type SecurityPersonnelProfileCreateInput = {
   id: string
   address?: string | null
-  avatarUrl?: string | null
   rank?: $Enums.PoliceRank | null
   bloodGroup?: $Enums.BloodGroup | null
   createdAt?: Date | string
@@ -279,7 +266,6 @@ export type SecurityPersonnelProfileUncheckedCreateInput = {
   id: string
   userId: string
   address?: string | null
-  avatarUrl?: string | null
   rank?: $Enums.PoliceRank | null
   bloodGroup?: $Enums.BloodGroup | null
   createdAt?: Date | string
@@ -289,7 +275,6 @@ export type SecurityPersonnelProfileUncheckedCreateInput = {
 export type SecurityPersonnelProfileUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rank?: Prisma.NullableEnumPoliceRankFieldUpdateOperationsInput | $Enums.PoliceRank | null
   bloodGroup?: Prisma.NullableEnumBloodGroupFieldUpdateOperationsInput | $Enums.BloodGroup | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -301,7 +286,6 @@ export type SecurityPersonnelProfileUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rank?: Prisma.NullableEnumPoliceRankFieldUpdateOperationsInput | $Enums.PoliceRank | null
   bloodGroup?: Prisma.NullableEnumBloodGroupFieldUpdateOperationsInput | $Enums.BloodGroup | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -312,7 +296,6 @@ export type SecurityPersonnelProfileCreateManyInput = {
   id: string
   userId: string
   address?: string | null
-  avatarUrl?: string | null
   rank?: $Enums.PoliceRank | null
   bloodGroup?: $Enums.BloodGroup | null
   createdAt?: Date | string
@@ -322,7 +305,6 @@ export type SecurityPersonnelProfileCreateManyInput = {
 export type SecurityPersonnelProfileUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rank?: Prisma.NullableEnumPoliceRankFieldUpdateOperationsInput | $Enums.PoliceRank | null
   bloodGroup?: Prisma.NullableEnumBloodGroupFieldUpdateOperationsInput | $Enums.BloodGroup | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -333,7 +315,6 @@ export type SecurityPersonnelProfileUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rank?: Prisma.NullableEnumPoliceRankFieldUpdateOperationsInput | $Enums.PoliceRank | null
   bloodGroup?: Prisma.NullableEnumBloodGroupFieldUpdateOperationsInput | $Enums.BloodGroup | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -349,7 +330,6 @@ export type SecurityPersonnelProfileCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   address?: Prisma.SortOrder
-  avatarUrl?: Prisma.SortOrder
   rank?: Prisma.SortOrder
   bloodGroup?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -360,7 +340,6 @@ export type SecurityPersonnelProfileMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   address?: Prisma.SortOrder
-  avatarUrl?: Prisma.SortOrder
   rank?: Prisma.SortOrder
   bloodGroup?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -371,7 +350,6 @@ export type SecurityPersonnelProfileMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   address?: Prisma.SortOrder
-  avatarUrl?: Prisma.SortOrder
   rank?: Prisma.SortOrder
   bloodGroup?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -421,7 +399,6 @@ export type NullableEnumBloodGroupFieldUpdateOperationsInput = {
 export type SecurityPersonnelProfileCreateWithoutUserInput = {
   id: string
   address?: string | null
-  avatarUrl?: string | null
   rank?: $Enums.PoliceRank | null
   bloodGroup?: $Enums.BloodGroup | null
   createdAt?: Date | string
@@ -431,7 +408,6 @@ export type SecurityPersonnelProfileCreateWithoutUserInput = {
 export type SecurityPersonnelProfileUncheckedCreateWithoutUserInput = {
   id: string
   address?: string | null
-  avatarUrl?: string | null
   rank?: $Enums.PoliceRank | null
   bloodGroup?: $Enums.BloodGroup | null
   createdAt?: Date | string
@@ -457,7 +433,6 @@ export type SecurityPersonnelProfileUpdateToOneWithWhereWithoutUserInput = {
 export type SecurityPersonnelProfileUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rank?: Prisma.NullableEnumPoliceRankFieldUpdateOperationsInput | $Enums.PoliceRank | null
   bloodGroup?: Prisma.NullableEnumBloodGroupFieldUpdateOperationsInput | $Enums.BloodGroup | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -467,7 +442,6 @@ export type SecurityPersonnelProfileUpdateWithoutUserInput = {
 export type SecurityPersonnelProfileUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rank?: Prisma.NullableEnumPoliceRankFieldUpdateOperationsInput | $Enums.PoliceRank | null
   bloodGroup?: Prisma.NullableEnumBloodGroupFieldUpdateOperationsInput | $Enums.BloodGroup | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -480,7 +454,6 @@ export type SecurityPersonnelProfileSelect<ExtArgs extends runtime.Types.Extensi
   id?: boolean
   userId?: boolean
   address?: boolean
-  avatarUrl?: boolean
   rank?: boolean
   bloodGroup?: boolean
   createdAt?: boolean
@@ -492,7 +465,6 @@ export type SecurityPersonnelProfileSelectCreateManyAndReturn<ExtArgs extends ru
   id?: boolean
   userId?: boolean
   address?: boolean
-  avatarUrl?: boolean
   rank?: boolean
   bloodGroup?: boolean
   createdAt?: boolean
@@ -504,7 +476,6 @@ export type SecurityPersonnelProfileSelectUpdateManyAndReturn<ExtArgs extends ru
   id?: boolean
   userId?: boolean
   address?: boolean
-  avatarUrl?: boolean
   rank?: boolean
   bloodGroup?: boolean
   createdAt?: boolean
@@ -516,14 +487,13 @@ export type SecurityPersonnelProfileSelectScalar = {
   id?: boolean
   userId?: boolean
   address?: boolean
-  avatarUrl?: boolean
   rank?: boolean
   bloodGroup?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type SecurityPersonnelProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "address" | "avatarUrl" | "rank" | "bloodGroup" | "createdAt" | "updatedAt", ExtArgs["result"]["securityPersonnelProfile"]>
+export type SecurityPersonnelProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "address" | "rank" | "bloodGroup" | "createdAt" | "updatedAt", ExtArgs["result"]["securityPersonnelProfile"]>
 export type SecurityPersonnelProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -543,7 +513,6 @@ export type $SecurityPersonnelProfilePayload<ExtArgs extends runtime.Types.Exten
     id: string
     userId: string
     address: string | null
-    avatarUrl: string | null
     rank: $Enums.PoliceRank | null
     bloodGroup: $Enums.BloodGroup | null
     createdAt: Date
@@ -975,7 +944,6 @@ export interface SecurityPersonnelProfileFieldRefs {
   readonly id: Prisma.FieldRef<"SecurityPersonnelProfile", 'String'>
   readonly userId: Prisma.FieldRef<"SecurityPersonnelProfile", 'String'>
   readonly address: Prisma.FieldRef<"SecurityPersonnelProfile", 'String'>
-  readonly avatarUrl: Prisma.FieldRef<"SecurityPersonnelProfile", 'String'>
   readonly rank: Prisma.FieldRef<"SecurityPersonnelProfile", 'PoliceRank'>
   readonly bloodGroup: Prisma.FieldRef<"SecurityPersonnelProfile", 'BloodGroup'>
   readonly createdAt: Prisma.FieldRef<"SecurityPersonnelProfile", 'DateTime'>

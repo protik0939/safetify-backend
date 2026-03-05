@@ -27,7 +27,6 @@ export type AggregateSuperAdminProfile = {
 export type SuperAdminProfileMinAggregateOutputType = {
   id: string | null
   userId: string | null
-  avatarUrl: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -35,7 +34,6 @@ export type SuperAdminProfileMinAggregateOutputType = {
 export type SuperAdminProfileMaxAggregateOutputType = {
   id: string | null
   userId: string | null
-  avatarUrl: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -43,7 +41,6 @@ export type SuperAdminProfileMaxAggregateOutputType = {
 export type SuperAdminProfileCountAggregateOutputType = {
   id: number
   userId: number
-  avatarUrl: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -53,7 +50,6 @@ export type SuperAdminProfileCountAggregateOutputType = {
 export type SuperAdminProfileMinAggregateInputType = {
   id?: true
   userId?: true
-  avatarUrl?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -61,7 +57,6 @@ export type SuperAdminProfileMinAggregateInputType = {
 export type SuperAdminProfileMaxAggregateInputType = {
   id?: true
   userId?: true
-  avatarUrl?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -69,7 +64,6 @@ export type SuperAdminProfileMaxAggregateInputType = {
 export type SuperAdminProfileCountAggregateInputType = {
   id?: true
   userId?: true
-  avatarUrl?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -150,7 +144,6 @@ export type SuperAdminProfileGroupByArgs<ExtArgs extends runtime.Types.Extension
 export type SuperAdminProfileGroupByOutputType = {
   id: string
   userId: string
-  avatarUrl: string | null
   createdAt: Date
   updatedAt: Date
   _count: SuperAdminProfileCountAggregateOutputType | null
@@ -179,7 +172,6 @@ export type SuperAdminProfileWhereInput = {
   NOT?: Prisma.SuperAdminProfileWhereInput | Prisma.SuperAdminProfileWhereInput[]
   id?: Prisma.StringFilter<"SuperAdminProfile"> | string
   userId?: Prisma.StringFilter<"SuperAdminProfile"> | string
-  avatarUrl?: Prisma.StringNullableFilter<"SuperAdminProfile"> | string | null
   createdAt?: Prisma.DateTimeFilter<"SuperAdminProfile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SuperAdminProfile"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -188,7 +180,6 @@ export type SuperAdminProfileWhereInput = {
 export type SuperAdminProfileOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -200,7 +191,6 @@ export type SuperAdminProfileWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.SuperAdminProfileWhereInput | Prisma.SuperAdminProfileWhereInput[]
   OR?: Prisma.SuperAdminProfileWhereInput[]
   NOT?: Prisma.SuperAdminProfileWhereInput | Prisma.SuperAdminProfileWhereInput[]
-  avatarUrl?: Prisma.StringNullableFilter<"SuperAdminProfile"> | string | null
   createdAt?: Prisma.DateTimeFilter<"SuperAdminProfile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SuperAdminProfile"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -209,7 +199,6 @@ export type SuperAdminProfileWhereUniqueInput = Prisma.AtLeast<{
 export type SuperAdminProfileOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.SuperAdminProfileCountOrderByAggregateInput
@@ -223,14 +212,12 @@ export type SuperAdminProfileScalarWhereWithAggregatesInput = {
   NOT?: Prisma.SuperAdminProfileScalarWhereWithAggregatesInput | Prisma.SuperAdminProfileScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"SuperAdminProfile"> | string
   userId?: Prisma.StringWithAggregatesFilter<"SuperAdminProfile"> | string
-  avatarUrl?: Prisma.StringNullableWithAggregatesFilter<"SuperAdminProfile"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"SuperAdminProfile"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"SuperAdminProfile"> | Date | string
 }
 
 export type SuperAdminProfileCreateInput = {
   id: string
-  avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutSuperAdminProfileInput
@@ -239,14 +226,12 @@ export type SuperAdminProfileCreateInput = {
 export type SuperAdminProfileUncheckedCreateInput = {
   id: string
   userId: string
-  avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type SuperAdminProfileUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutSuperAdminProfileNestedInput
@@ -255,7 +240,6 @@ export type SuperAdminProfileUpdateInput = {
 export type SuperAdminProfileUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -263,14 +247,12 @@ export type SuperAdminProfileUncheckedUpdateInput = {
 export type SuperAdminProfileCreateManyInput = {
   id: string
   userId: string
-  avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type SuperAdminProfileUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -278,7 +260,6 @@ export type SuperAdminProfileUpdateManyMutationInput = {
 export type SuperAdminProfileUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -291,7 +272,6 @@ export type SuperAdminProfileNullableScalarRelationFilter = {
 export type SuperAdminProfileCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -299,7 +279,6 @@ export type SuperAdminProfileCountOrderByAggregateInput = {
 export type SuperAdminProfileMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -307,7 +286,6 @@ export type SuperAdminProfileMaxOrderByAggregateInput = {
 export type SuperAdminProfileMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -346,14 +324,12 @@ export type SuperAdminProfileUncheckedUpdateOneWithoutUserNestedInput = {
 
 export type SuperAdminProfileCreateWithoutUserInput = {
   id: string
-  avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type SuperAdminProfileUncheckedCreateWithoutUserInput = {
   id: string
-  avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -376,14 +352,12 @@ export type SuperAdminProfileUpdateToOneWithWhereWithoutUserInput = {
 
 export type SuperAdminProfileUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type SuperAdminProfileUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -393,7 +367,6 @@ export type SuperAdminProfileUncheckedUpdateWithoutUserInput = {
 export type SuperAdminProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  avatarUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -402,7 +375,6 @@ export type SuperAdminProfileSelect<ExtArgs extends runtime.Types.Extensions.Int
 export type SuperAdminProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  avatarUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -411,7 +383,6 @@ export type SuperAdminProfileSelectCreateManyAndReturn<ExtArgs extends runtime.T
 export type SuperAdminProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  avatarUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -420,12 +391,11 @@ export type SuperAdminProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.T
 export type SuperAdminProfileSelectScalar = {
   id?: boolean
   userId?: boolean
-  avatarUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type SuperAdminProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "avatarUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["superAdminProfile"]>
+export type SuperAdminProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["superAdminProfile"]>
 export type SuperAdminProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -444,7 +414,6 @@ export type $SuperAdminProfilePayload<ExtArgs extends runtime.Types.Extensions.I
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     userId: string
-    avatarUrl: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["superAdminProfile"]>
@@ -873,7 +842,6 @@ export interface Prisma__SuperAdminProfileClient<T, Null = never, ExtArgs extend
 export interface SuperAdminProfileFieldRefs {
   readonly id: Prisma.FieldRef<"SuperAdminProfile", 'String'>
   readonly userId: Prisma.FieldRef<"SuperAdminProfile", 'String'>
-  readonly avatarUrl: Prisma.FieldRef<"SuperAdminProfile", 'String'>
   readonly createdAt: Prisma.FieldRef<"SuperAdminProfile", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"SuperAdminProfile", 'DateTime'>
 }

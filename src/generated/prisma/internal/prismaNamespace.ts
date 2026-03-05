@@ -1121,7 +1121,6 @@ export const AdminProfileScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   address: 'address',
-  avatarUrl: 'avatarUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1207,7 +1206,6 @@ export const SecurityPersonnelProfileScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   address: 'address',
-  avatarUrl: 'avatarUrl',
   rank: 'rank',
   bloodGroup: 'bloodGroup',
   createdAt: 'createdAt',
@@ -1220,7 +1218,6 @@ export type SecurityPersonnelProfileScalarFieldEnum = (typeof SecurityPersonnelP
 export const SuperAdminProfileScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  avatarUrl: 'avatarUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1232,7 +1229,6 @@ export const UserProfileScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   bio: 'bio',
-  avatarUrl: 'avatarUrl',
   address: 'address',
   bloodGroup: 'bloodGroup',
   createdAt: 'createdAt',

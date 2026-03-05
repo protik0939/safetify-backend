@@ -2,7 +2,6 @@ model SecurityPersonnelProfile {
     id         String      @id
     userId     String      @unique
     address    String?
-    avatarUrl  String?
     rank       PoliceRank?
     bloodGroup BloodGroup?
     user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)

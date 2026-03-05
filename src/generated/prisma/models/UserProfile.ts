@@ -28,7 +28,6 @@ export type UserProfileMinAggregateOutputType = {
   id: string | null
   userId: string | null
   bio: string | null
-  avatarUrl: string | null
   address: string | null
   bloodGroup: $Enums.BloodGroup | null
   createdAt: Date | null
@@ -39,7 +38,6 @@ export type UserProfileMaxAggregateOutputType = {
   id: string | null
   userId: string | null
   bio: string | null
-  avatarUrl: string | null
   address: string | null
   bloodGroup: $Enums.BloodGroup | null
   createdAt: Date | null
@@ -50,7 +48,6 @@ export type UserProfileCountAggregateOutputType = {
   id: number
   userId: number
   bio: number
-  avatarUrl: number
   address: number
   bloodGroup: number
   createdAt: number
@@ -63,7 +60,6 @@ export type UserProfileMinAggregateInputType = {
   id?: true
   userId?: true
   bio?: true
-  avatarUrl?: true
   address?: true
   bloodGroup?: true
   createdAt?: true
@@ -74,7 +70,6 @@ export type UserProfileMaxAggregateInputType = {
   id?: true
   userId?: true
   bio?: true
-  avatarUrl?: true
   address?: true
   bloodGroup?: true
   createdAt?: true
@@ -85,7 +80,6 @@ export type UserProfileCountAggregateInputType = {
   id?: true
   userId?: true
   bio?: true
-  avatarUrl?: true
   address?: true
   bloodGroup?: true
   createdAt?: true
@@ -169,7 +163,6 @@ export type UserProfileGroupByOutputType = {
   id: string
   userId: string
   bio: string | null
-  avatarUrl: string | null
   address: string | null
   bloodGroup: $Enums.BloodGroup | null
   createdAt: Date
@@ -201,7 +194,6 @@ export type UserProfileWhereInput = {
   id?: Prisma.StringFilter<"UserProfile"> | string
   userId?: Prisma.StringFilter<"UserProfile"> | string
   bio?: Prisma.StringNullableFilter<"UserProfile"> | string | null
-  avatarUrl?: Prisma.StringNullableFilter<"UserProfile"> | string | null
   address?: Prisma.StringNullableFilter<"UserProfile"> | string | null
   bloodGroup?: Prisma.EnumBloodGroupNullableFilter<"UserProfile"> | $Enums.BloodGroup | null
   createdAt?: Prisma.DateTimeFilter<"UserProfile"> | Date | string
@@ -213,7 +205,6 @@ export type UserProfileOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   bio?: Prisma.SortOrderInput | Prisma.SortOrder
-  avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
   bloodGroup?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -228,7 +219,6 @@ export type UserProfileWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.UserProfileWhereInput[]
   NOT?: Prisma.UserProfileWhereInput | Prisma.UserProfileWhereInput[]
   bio?: Prisma.StringNullableFilter<"UserProfile"> | string | null
-  avatarUrl?: Prisma.StringNullableFilter<"UserProfile"> | string | null
   address?: Prisma.StringNullableFilter<"UserProfile"> | string | null
   bloodGroup?: Prisma.EnumBloodGroupNullableFilter<"UserProfile"> | $Enums.BloodGroup | null
   createdAt?: Prisma.DateTimeFilter<"UserProfile"> | Date | string
@@ -240,7 +230,6 @@ export type UserProfileOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   bio?: Prisma.SortOrderInput | Prisma.SortOrder
-  avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
   bloodGroup?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -257,7 +246,6 @@ export type UserProfileScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"UserProfile"> | string
   userId?: Prisma.StringWithAggregatesFilter<"UserProfile"> | string
   bio?: Prisma.StringNullableWithAggregatesFilter<"UserProfile"> | string | null
-  avatarUrl?: Prisma.StringNullableWithAggregatesFilter<"UserProfile"> | string | null
   address?: Prisma.StringNullableWithAggregatesFilter<"UserProfile"> | string | null
   bloodGroup?: Prisma.EnumBloodGroupNullableWithAggregatesFilter<"UserProfile"> | $Enums.BloodGroup | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"UserProfile"> | Date | string
@@ -267,7 +255,6 @@ export type UserProfileScalarWhereWithAggregatesInput = {
 export type UserProfileCreateInput = {
   id: string
   bio?: string | null
-  avatarUrl?: string | null
   address?: string | null
   bloodGroup?: $Enums.BloodGroup | null
   createdAt?: Date | string
@@ -279,7 +266,6 @@ export type UserProfileUncheckedCreateInput = {
   id: string
   userId: string
   bio?: string | null
-  avatarUrl?: string | null
   address?: string | null
   bloodGroup?: $Enums.BloodGroup | null
   createdAt?: Date | string
@@ -289,7 +275,6 @@ export type UserProfileUncheckedCreateInput = {
 export type UserProfileUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bloodGroup?: Prisma.NullableEnumBloodGroupFieldUpdateOperationsInput | $Enums.BloodGroup | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -301,7 +286,6 @@ export type UserProfileUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bloodGroup?: Prisma.NullableEnumBloodGroupFieldUpdateOperationsInput | $Enums.BloodGroup | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -312,7 +296,6 @@ export type UserProfileCreateManyInput = {
   id: string
   userId: string
   bio?: string | null
-  avatarUrl?: string | null
   address?: string | null
   bloodGroup?: $Enums.BloodGroup | null
   createdAt?: Date | string
@@ -322,7 +305,6 @@ export type UserProfileCreateManyInput = {
 export type UserProfileUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bloodGroup?: Prisma.NullableEnumBloodGroupFieldUpdateOperationsInput | $Enums.BloodGroup | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -333,7 +315,6 @@ export type UserProfileUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bloodGroup?: Prisma.NullableEnumBloodGroupFieldUpdateOperationsInput | $Enums.BloodGroup | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -349,7 +330,6 @@ export type UserProfileCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   bio?: Prisma.SortOrder
-  avatarUrl?: Prisma.SortOrder
   address?: Prisma.SortOrder
   bloodGroup?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -360,7 +340,6 @@ export type UserProfileMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   bio?: Prisma.SortOrder
-  avatarUrl?: Prisma.SortOrder
   address?: Prisma.SortOrder
   bloodGroup?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -371,7 +350,6 @@ export type UserProfileMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   bio?: Prisma.SortOrder
-  avatarUrl?: Prisma.SortOrder
   address?: Prisma.SortOrder
   bloodGroup?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -413,7 +391,6 @@ export type UserProfileUncheckedUpdateOneWithoutUserNestedInput = {
 export type UserProfileCreateWithoutUserInput = {
   id: string
   bio?: string | null
-  avatarUrl?: string | null
   address?: string | null
   bloodGroup?: $Enums.BloodGroup | null
   createdAt?: Date | string
@@ -423,7 +400,6 @@ export type UserProfileCreateWithoutUserInput = {
 export type UserProfileUncheckedCreateWithoutUserInput = {
   id: string
   bio?: string | null
-  avatarUrl?: string | null
   address?: string | null
   bloodGroup?: $Enums.BloodGroup | null
   createdAt?: Date | string
@@ -449,7 +425,6 @@ export type UserProfileUpdateToOneWithWhereWithoutUserInput = {
 export type UserProfileUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bloodGroup?: Prisma.NullableEnumBloodGroupFieldUpdateOperationsInput | $Enums.BloodGroup | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -459,7 +434,6 @@ export type UserProfileUpdateWithoutUserInput = {
 export type UserProfileUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bloodGroup?: Prisma.NullableEnumBloodGroupFieldUpdateOperationsInput | $Enums.BloodGroup | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -472,7 +446,6 @@ export type UserProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   id?: boolean
   userId?: boolean
   bio?: boolean
-  avatarUrl?: boolean
   address?: boolean
   bloodGroup?: boolean
   createdAt?: boolean
@@ -484,7 +457,6 @@ export type UserProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   id?: boolean
   userId?: boolean
   bio?: boolean
-  avatarUrl?: boolean
   address?: boolean
   bloodGroup?: boolean
   createdAt?: boolean
@@ -496,7 +468,6 @@ export type UserProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   id?: boolean
   userId?: boolean
   bio?: boolean
-  avatarUrl?: boolean
   address?: boolean
   bloodGroup?: boolean
   createdAt?: boolean
@@ -508,14 +479,13 @@ export type UserProfileSelectScalar = {
   id?: boolean
   userId?: boolean
   bio?: boolean
-  avatarUrl?: boolean
   address?: boolean
   bloodGroup?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "bio" | "avatarUrl" | "address" | "bloodGroup" | "createdAt" | "updatedAt", ExtArgs["result"]["userProfile"]>
+export type UserProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "bio" | "address" | "bloodGroup" | "createdAt" | "updatedAt", ExtArgs["result"]["userProfile"]>
 export type UserProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -535,7 +505,6 @@ export type $UserProfilePayload<ExtArgs extends runtime.Types.Extensions.Interna
     id: string
     userId: string
     bio: string | null
-    avatarUrl: string | null
     address: string | null
     bloodGroup: $Enums.BloodGroup | null
     createdAt: Date
@@ -967,7 +936,6 @@ export interface UserProfileFieldRefs {
   readonly id: Prisma.FieldRef<"UserProfile", 'String'>
   readonly userId: Prisma.FieldRef<"UserProfile", 'String'>
   readonly bio: Prisma.FieldRef<"UserProfile", 'String'>
-  readonly avatarUrl: Prisma.FieldRef<"UserProfile", 'String'>
   readonly address: Prisma.FieldRef<"UserProfile", 'String'>
   readonly bloodGroup: Prisma.FieldRef<"UserProfile", 'BloodGroup'>
   readonly createdAt: Prisma.FieldRef<"UserProfile", 'DateTime'>

@@ -32,7 +32,36 @@ const getEmergencyContactByUserId = catchAsync(
   },
 );
 
+const updateEmergencyContact = catchAsync(
+  async (req: Request, res: Response) => {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const payload = req.body;
+    const result =
+      await EmergencyContactService.updateEmergecyContact(id, payload);
+    sendResponse(res, {
+      httpStatusCode: 200,
+      success: true,
+      message: "Emergency contact updated successfully",
+      data: result,
+    });
+  },
+);
+
+const deleteEmergencyContact = catchAsync(
+  async (req: Request, res: Response) => {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    await EmergencyContactService.deleteEmergencyContact(id);
+    sendResponse(res, {
+      httpStatusCode: 200,
+      success: true,
+      message: "Emergency contact deleted successfully",
+    });
+  }
+);
+
 export const EmergencyContactController = {
   createEmergencyContact,
   getEmergencyContactByUserId,
+  updateEmergencyContact,
+  deleteEmergencyContact,
 };

@@ -3,7 +3,6 @@ model UserProfile {
   userId     String      @unique
   user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   bio        String?
-  avatarUrl  String?
   address    String?
   bloodGroup BloodGroup?
   createdAt  DateTime    @default(now())
