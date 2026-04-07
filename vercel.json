@@ -1,11 +1,6 @@
 {
   "version": 2,
   "buildCommand": "pnpm run build",
-  "functions": {
-    "api/app.js": {
-      "runtime": "nodejs20.x"
-    }
-  },
   "routes": [
     {
       "src": "/(.*)",
