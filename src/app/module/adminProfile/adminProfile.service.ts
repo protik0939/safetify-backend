@@ -1,4 +1,4 @@
-import { AdminProfile } from "../../../generated/prisma/client";
+import { AdminProfile } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 import {
   ICreateAdminProfile,

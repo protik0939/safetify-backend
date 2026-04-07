@@ -1,4 +1,4 @@
-import { BloodGroup } from "../../../generated/prisma/client";
+import { BloodGroup } from "@prisma/client";
 
 export interface ICreateUserProfile {
   userId: string;

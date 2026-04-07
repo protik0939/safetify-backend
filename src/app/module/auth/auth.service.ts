@@ -1,4 +1,4 @@
-import { AccountStatus } from "../../../generated/prisma/enums";
+import { AccountStatus } from "@prisma/client";
 import { auth } from "../../lib/auth";
 import { ILoginUser, IRegisterUser } from "./auth.interface";
 

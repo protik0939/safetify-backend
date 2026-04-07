@@ -1,4 +1,4 @@
-import { UserProfile } from "../../../generated/prisma/client";
+import { UserProfile } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 import { ICreateUserProfile, IUpdateUserProfile } from "./userProfile.interface";
 

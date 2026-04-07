@@ -1,4 +1,4 @@
-import { SecurityPersonnelProfile } from "../../../generated/prisma/client";
+import { SecurityPersonnelProfile } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 import {
   ICreateSecurityPersonnelProfile,

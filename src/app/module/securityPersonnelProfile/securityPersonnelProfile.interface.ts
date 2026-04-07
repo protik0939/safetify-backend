@@ -1,4 +1,4 @@
-import { BloodGroup, PoliceRank } from "../../../generated/prisma/client";
+import { BloodGroup, PoliceRank } from "@prisma/client";
 
 export interface ICreateSecurityPersonnelProfile {
   userId: string;

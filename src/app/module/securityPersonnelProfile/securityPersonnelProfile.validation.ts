@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BloodGroup, PoliceRank } from "../../../generated/prisma/client";
+import { BloodGroup, PoliceRank } from "@prisma/client";
 
 const bloodGroupSchema = z.nativeEnum(BloodGroup, {
   message: "Invalid blood group",
