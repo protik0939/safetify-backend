@@ -1,0 +1,13 @@
+model incidentResponder {
+    id             String   @id @default(uuid())
+    incidentId     String
+    incident       incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+    responderId    String
+    responder      UserProfile @relation(fields: [responderId], references: [id], onDelete: Cascade)
+    respondedAt    DateTime
+    status         String
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @updatedAt
+
+    @@map("incident_responder")
+}

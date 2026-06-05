@@ -1,0 +1,15 @@
+model danzerZone {
+    id             String   @id @default(uuid())
+    incidentId     String
+    incident       incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+    name           String
+    description    String?
+    startTime      DateTime
+    endTime        DateTime
+    boundary       String // GeoJSON format
+    severityRadius Float
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @updatedAt
+
+    @@map("danzer_zone")
+}

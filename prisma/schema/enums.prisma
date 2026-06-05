@@ -42,3 +42,11 @@ enum PoliceRank {
     NAYEK
     CONSTABLE
 }
+
+enum IncidentType {
+    THEFT
+    ASSAULT
+    VANDALISM
+    FRAUD
+    OTHER
+}

@@ -7,6 +7,8 @@ model UserProfile {
   bloodGroup BloodGroup?
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
+  incidents  incident[]
+  responder incidentResponder[]
 
   @@map("user_profile")
 }
