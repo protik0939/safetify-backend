@@ -18,6 +18,14 @@ const createUserProfileSchema = z.object({
       .trim()
       .max(255, "Address must not exceed 255 characters")
       .optional(),
+    contactNo: z
+      .string()
+      .trim()
+      .regex(
+        /^(?:\+8801|01)[3-9]\d{8}$/,
+        "Invalid contact number, must be a valid Bangladeshi number starting with +8801 or 01 followed by 3-9 and 8 digits"
+      )
+      .optional(),
     bloodGroup: bloodGroupSchema.optional(),
   }),
 });
@@ -36,6 +44,14 @@ const updateUserProfileSchema = z.object({
         .max(255, "Address must not exceed 255 characters")
         .optional(),
       bloodGroup: bloodGroupSchema.optional(),
+      contactNo: z
+        .string()
+        .trim()
+        .regex(
+          /^(?:\+8801|01)[3-9]\d{8}$/,
+          "Invalid contact number, must be a valid Bangladeshi number starting with +8801 or 01 followed by 3-9 and 8 digits"
+        )
+        .optional(),
     })
     .refine(
       (data) => Object.keys(data).length > 0,

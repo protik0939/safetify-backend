@@ -10,7 +10,7 @@ const router = Router();
 
 router.use("/auth", AuthRoutes);
 router.use("/emergency-contact", EmergencyContactRoute);
-router.use("/user-profile", UserProfileRoute);
+router.use("/user", UserProfileRoute);
 router.use("/security-personnel-profile", SecurityPersonnelProfileRoute);
 router.use("/admin-profile", AdminProfileRoute);
 router.use("/super-admin-profile", SuperAdminProfileRoute);

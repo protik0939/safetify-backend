@@ -17,6 +17,26 @@ export const auth = betterAuth({
         required: true,
         defaultValue: Role.USER,
       },
+      contactNo: {
+        type: "string",
+        required: false,
+        defaultValue: null,
+      },
+      bio: {
+        type: "string",
+        required: false,
+        defaultValue: "Safetify User",
+      },
+      address: {
+        type: "string",
+        required: false,
+        defaultValue: null,
+      },
+      bloodGroup: {
+        type: "string",
+        required: false,
+        defaultValue: null,
+      },
       accountStatus: {
         type: "string",
         required: true,

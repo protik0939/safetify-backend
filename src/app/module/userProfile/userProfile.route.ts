@@ -10,12 +10,12 @@ router.post(
   validateRequest(UserProfileValidation.createUserProfileSchema),
   UserProfileController.createUserProfile,
 );
-router.get("/user/:userId", UserProfileController.getUserProfileByUserId);
+router.get("/:userId", UserProfileController.getUserProfileByUserId);
 router.put(
-  "/user/:userId",
+  "/:userId",
   validateRequest(UserProfileValidation.updateUserProfileSchema),
   UserProfileController.updateUserProfile,
 );
-router.delete("/user/:userId", UserProfileController.deleteUserProfile);
+router.delete("/:userId", UserProfileController.deleteUserProfile);
 
 export const UserProfileRoute = router;

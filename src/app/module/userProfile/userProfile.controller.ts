@@ -20,6 +20,7 @@ const getUserProfileByUserId = catchAsync(
     const userId = Array.isArray(req.params.userId)
       ? req.params.userId[0]
       : req.params.userId;
+  console.log("req.params.userId", req.params.userId);
     const result = await UserProfileService.getUserProfileByUserId(userId);
 
     sendResponse(res, {

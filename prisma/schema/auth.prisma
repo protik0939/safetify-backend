@@ -1,5 +1,5 @@
 model User {
-    id                       String                    @id   @default(uuid())
+    id                       String                    @id @default(uuid())
     name                     String
     email                    String
     emailVerified            Boolean                   @default(false)
@@ -11,11 +11,17 @@ model User {
     deletedAt                DateTime?
     sessions                 Session[]
     accounts                 Account[]
-    userProfile              UserProfile?
     adminProfile             AdminProfile?
     superAdminProfile        SuperAdminProfile?
     securityPersonnelProfile SecurityPersonnelProfile?
     emergencyContacts        EmergencyContact[]
+    incidentResponders       incidentResponder[]
+    incidents                incident[]
+
+    contactNo  String?
+    bio        String? @default("Safetify User")
+    address    String?
+    bloodGroup String?
 
     @@unique([email])
     @@map("user")
