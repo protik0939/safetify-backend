@@ -13,6 +13,7 @@ const createUserProfile = async (
       bio: payload.bio,
       address: payload.address,
       bloodGroup: payload.bloodGroup,
+      gender: payload.gender,
     },
   });
   return userProfile;

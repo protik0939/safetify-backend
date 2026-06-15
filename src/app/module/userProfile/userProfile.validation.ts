@@ -8,6 +8,8 @@ const bloodGroupSchema = z.nativeEnum(BloodGroup, {
 const createUserProfileSchema = z.object({
   body: z.object({
     userId: z.string({ message: "User ID is required" }),
+    name: z.string().trim().optional(),
+    image: z.string().trim().nullable().optional().or(z.literal("")),
     bio: z
       .string()
       .trim()
@@ -26,13 +28,29 @@ const createUserProfileSchema = z.object({
         "Invalid contact number, must be a valid Bangladeshi number starting with +8801 or 01 followed by 3-9 and 8 digits"
       )
       .optional(),
+    location: z
+      .string()
+      .trim()
+      .max(255, "Location must not exceed 255 characters")
+      .optional(),
     bloodGroup: bloodGroupSchema.optional(),
+    gender: z
+      .string()
+      .trim()
+      .transform((val) => val.charAt(0).toUpperCase() + val.slice(1).toLowerCase())
+      .refine(
+        (val) => ["Male", "Female", "Others"].includes(val),
+        { message: "Gender must be Male, Female, or Others" }
+      )
+      .optional(),
   }),
 });
 
 const updateUserProfileSchema = z.object({
   body: z
     .object({
+      name: z.string().trim().optional(),
+      image: z.string().trim().nullable().optional().or(z.literal("")),
       bio: z
         .string()
         .trim()
@@ -50,6 +68,20 @@ const updateUserProfileSchema = z.object({
         .regex(
           /^(?:\+8801|01)[3-9]\d{8}$/,
           "Invalid contact number, must be a valid Bangladeshi number starting with +8801 or 01 followed by 3-9 and 8 digits"
+        )
+        .optional(),
+      location: z
+        .string()
+        .trim()
+        .max(255, "Location must not exceed 255 characters")
+        .optional(),
+      gender: z
+        .string()
+        .trim()
+        .transform((val) => val.charAt(0).toUpperCase() + val.slice(1).toLowerCase())
+        .refine(
+          (val) => ["Male", "Female", "Others"].includes(val),
+          { message: "Gender must be Male, Female, or Others" }
         )
         .optional(),
     })

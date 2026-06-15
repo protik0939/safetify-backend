@@ -5,10 +5,19 @@ export interface ICreateUserProfile {
   bio?: string;
   address?: string;
   bloodGroup?: string;
+  gender?: string;
+  image?: string;
+  location?: string;
+  contactNo?: string;
 }
 
 export interface IUpdateUserProfile {
+  name?: string;
+  image?: string;
   bio?: string;
   address?: string;
   bloodGroup?: string;
+  gender?: string;
+  location?: string;
+  contactNo?: string;
 }
