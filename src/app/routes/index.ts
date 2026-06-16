@@ -5,6 +5,7 @@ import { UserProfileRoute } from "../module/userProfile/userProfile.route";
 import { SecurityPersonnelProfileRoute } from "../module/securityPersonnelProfile/securityPersonnelProfile.route";
 import { AdminProfileRoute } from "../module/adminProfile/adminProfile.route";
 import { SuperAdminProfileRoute } from "../module/superAdminProfile/superAdminProfile.route";
+import { IncidentReportingRoute } from "../module/incidentReporting/incidentReporting.route";
 
 const router = Router();
 
@@ -14,5 +15,6 @@ router.use("/user", UserProfileRoute);
 router.use("/security-personnel-profile", SecurityPersonnelProfileRoute);
 router.use("/admin-profile", AdminProfileRoute);
 router.use("/super-admin-profile", SuperAdminProfileRoute);
+router.use("/incidents", IncidentReportingRoute);
 
 export const IndexRouters = router;
