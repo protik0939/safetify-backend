@@ -4,6 +4,8 @@ import { prisma } from "./prisma";
 import { AccountStatus, Role } from "@prisma/client";
 
 export const auth = betterAuth({
+  basePath: "/api/v1/auth",
+  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:5000",
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
@@ -16,6 +18,10 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     },
   },
+  trustedOrigins: [
+    "safetify://",
+    process.env.BETTER_AUTH_URL || "http://localhost:5000",
+  ],
   user: {
     additionalFields: {
       role: {
