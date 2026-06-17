@@ -1,5 +1,6 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
 import { IndexRouters } from './app/routes';
+import { AuthRoutes } from './app/module/auth/auth.route';
 import { toNodeHandler } from 'better-auth/node';
 import { auth } from './app/lib/auth';
 
@@ -9,12 +10,14 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.json());
 
-// Custom auth routes (register, login, session) — must come first
-app.use('/api/v1/', IndexRouters);
+// Custom auth routes (register, login, session)
+app.use('/api/v1/auth', AuthRoutes);
 
-// better-auth catch-all for everything else (social OAuth, sign-out, etc.)
-// Mounted AFTER custom routes so /register and /login take precedence
+// better-auth catch-all — handles social OAuth, sign-out, etc.
 app.use('/api/v1/auth', toNodeHandler(auth));
+
+// All other routes
+app.use('/api/v1/', IndexRouters);
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello, TypeScript + Express!');

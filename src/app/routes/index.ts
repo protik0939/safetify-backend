@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { AuthRoutes } from "../module/auth/auth.route";
 import { EmergencyContactRoute } from "../module/emergencyContact/emergencyContact.route";
 import { UserProfileRoute } from "../module/userProfile/userProfile.route";
 import { SecurityPersonnelProfileRoute } from "../module/securityPersonnelProfile/securityPersonnelProfile.route";
@@ -9,7 +8,7 @@ import { IncidentReportingRoute } from "../module/incidentReporting/incidentRepo
 
 const router = Router();
 
-router.use("/auth", AuthRoutes);
+// auth is handled in app.ts (custom routes + toNodeHandler catch-all)
 router.use("/emergency-contact", EmergencyContactRoute);
 router.use("/user", UserProfileRoute);
 router.use("/security-personnel-profile", SecurityPersonnelProfileRoute);
