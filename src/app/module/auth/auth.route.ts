@@ -51,9 +51,11 @@ router.get("/social-login", catchAsync(async (req: Request, res: Response) => {
 }));
 
 router.get("/session", catchAsync(async (req: Request, res: Response) => {
+  console.log("[auth.route /session] Incoming authorization:", req.headers.authorization);
   const session = await auth.api.getSession({
     headers: req.headers as Record<string, string>,
   });
+  console.log("[auth.route /session] Retrieved session data:", session);
   sendResponse(res, {
     httpStatusCode: 200,
     success: true,
