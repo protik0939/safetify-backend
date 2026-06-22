@@ -11,6 +11,42 @@ const router = Router();
 router.post("/register", validateRequest(AuthValidation.registerSchema), AuthController.registerUser);
 router.post("/login", validateRequest(AuthValidation.loginSchema), AuthController.loginUser);
 
+router.get("/social-login", catchAsync(async (req: Request, res: Response) => {
+  const provider = req.query.provider as string;
+  const callbackURL = req.query.callbackURL as string;
+
+  if (!provider || !callbackURL) {
+    res.status(400).json({ success: false, message: "provider and callbackURL are required" });
+    return;
+  }
+
+  const authRes = await auth.api.signInSocial({
+    body: {
+      provider,
+      callbackURL,
+    },
+    asResponse: true,
+  });
+
+  const setCookies = authRes.headers.getSetCookie 
+    ? authRes.headers.getSetCookie() 
+    : (authRes.headers.get("set-cookie") ? [authRes.headers.get("set-cookie")!] : []);
+
+  if (setCookies.length > 0) {
+    res.setHeader("Set-Cookie", setCookies);
+  }
+
+  const data = await authRes.json() as { url?: string };
+  const url = data?.url;
+
+  if (!url) {
+    res.status(400).json({ success: false, message: "Failed to initiate social login" });
+    return;
+  }
+
+  res.redirect(url);
+}));
+
 router.get("/session", catchAsync(async (req: Request, res: Response) => {
   const session = await auth.api.getSession({
     headers: req.headers as Record<string, string>,
