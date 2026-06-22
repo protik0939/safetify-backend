@@ -26,11 +26,14 @@ router.get("/social-login", catchAsync(async (req: Request, res: Response) => {
       callbackURL,
     },
     asResponse: true,
+    headers: req.headers as Record<string, string>,
   });
 
   const setCookies = authRes.headers.getSetCookie 
     ? authRes.headers.getSetCookie() 
     : (authRes.headers.get("set-cookie") ? [authRes.headers.get("set-cookie")!] : []);
+
+  console.log("[social-login] Set-Cookie headers:", setCookies);
 
   if (setCookies.length > 0) {
     res.setHeader("Set-Cookie", setCookies);
