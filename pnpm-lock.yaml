@@ -11,6 +11,9 @@ importers:
       '@prisma/adapter-pg':
         specifier: ^7.4.2
         version: 7.7.0
+      '@prisma/client':
+        specifier: ^7.8.0
+        version: 7.8.0(prisma@7.8.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)
       better-auth:
         specifier: ^1.5.2
         version: 1.6.0(@opentelemetry/api@1.9.1)(@prisma/client@7.8.0(prisma@7.8.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3))(mysql2@3.15.3)(pg@8.20.0)(prisma@7.8.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -23,6 +26,9 @@ importers:
       pg:
         specifier: ^8.19.0
         version: 8.20.0
+      prisma:
+        specifier: ^7.8.0
+        version: 7.8.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
       zod:
         specifier: ^4.3.6
         version: 4.3.6
@@ -45,9 +51,6 @@ importers:
       eslint:
         specifier: ^10.0.2
         version: 10.2.0(jiti@2.6.1)
-      prisma:
-        specifier: ^7.8.0
-        version: 7.8.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(jiti@2.6.1)(tsx@4.21.0)(typescript@5.9.3)
@@ -1196,8 +1199,8 @@ packages:
   get-tsconfig@4.13.7:
     resolution: {integrity: sha512-7tN6rFgBlMgpBML5j8typ92BKFi2sFQvIdpAqLA2beia5avZDrMs0FLZiM5etShWq5irVyGcGMEA1jcDaK7A/Q==}
 
-  giget@3.2.0:
-    resolution: {integrity: sha512-GvHTWcykIR/fP8cj8dMpuMMkvaeJfPvYnhq0oW+chSeIr+ldX21ifU2Ms6KBoyKZQZmVaUAAhQ2EZ68KJF8a7A==}
+  giget@3.3.0:
+    resolution: {integrity: sha512-gzi2D96p+AMfDcmJHGDj3KJ9NRiwvlFAU5yfa3ROwWZmFUjX4P43x3BcyRaOMMLto1vUo7C+86+MFhYTl6Ryiw==}
     hasBin: true
 
   glob-parent@6.0.2:
@@ -2535,7 +2538,7 @@ snapshots:
       defu: 6.1.7
       dotenv: 17.4.1
       exsolve: 1.0.8
-      giget: 3.2.0
+      giget: 3.3.0
       jiti: 2.6.1
       ohash: 2.0.11
       pathe: 2.0.3
@@ -2863,7 +2866,7 @@ snapshots:
     dependencies:
       resolve-pkg-maps: 1.0.0
 
-  giget@3.2.0: {}
+  giget@3.3.0: {}
 
   glob-parent@6.0.2:
     dependencies:

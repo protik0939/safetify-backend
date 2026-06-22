@@ -1,17 +1,27 @@
+
 model incident {
-    id            String       @id @default(uuid())
-    userId        String
-    user          UserProfile  @relation(fields: [userId], references: [id], onDelete: Cascade)
-    type          IncidentType
-    description   String?
-    coordinates   String // GeoJSON format
-    severityLevel String
-    status        String
-    reportedAt    DateTime
-    createdAt     DateTime     @default(now())
-    updatedAt     DateTime     @updatedAt
-    danzerZones   danzerZone[]
-    responders     incidentResponder[]
+    id                 String              @id @default(uuid())
+    userId             String
+    user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+    title              String?
+    type               IncidentType?
+    description        String?
+    latitude           Float
+    longitude          Float
+    severityLevel      String?
+    timing             String
+    status             String?
+    victim             String?
+    attackers          String?
+    deathToll          Int                 @default(0)
+    injuryCount        Int                 @default(0)
+    peopleHelped       Int                 @default(0)
+    stories            String[]
+    reportedAt         DateTime
+    createdAt          DateTime            @default(now())
+    updatedAt          DateTime            @updatedAt
+    danzerZones        danzerZone[]
+    incidentResponders incidentResponder[]
 
     @@map("incident")
 }

@@ -1,17 +1,19 @@
-import { UserProfile } from "@prisma/client";
+import { AccountStatus, User } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
 import { ICreateUserProfile, IUpdateUserProfile } from "./userProfile.interface";
 
 const createUserProfile = async (
   payload: ICreateUserProfile,
-): Promise<UserProfile> => {
-  const userProfile = await prisma.userProfile.create({
+): Promise<User> => {
+  const userProfile = await prisma.user.create({
     data: {
       id: payload.userId,
-      userId: payload.userId,
+      name: payload.name,
+      email: payload.email,
       bio: payload.bio,
       address: payload.address,
       bloodGroup: payload.bloodGroup,
+      gender: payload.gender,
     },
   });
   return userProfile;
@@ -19,10 +21,10 @@ const createUserProfile = async (
 
 const getUserProfileByUserId = async (
   userId: string,
-): Promise<UserProfile | null> => {
-  const userProfile = await prisma.userProfile.findUnique({
+): Promise<User | null> => {
+  const userProfile = await prisma.user.findUnique({
     where: {
-      userId: userId,
+      id: userId,
     },
   });
   return userProfile;
@@ -31,10 +33,10 @@ const getUserProfileByUserId = async (
 const updateUserProfile = async (
   userId: string,
   data: IUpdateUserProfile,
-): Promise<UserProfile> => {
-  const userProfile = await prisma.userProfile.update({
+): Promise<User> => {
+  const userProfile = await prisma.user.update({
     where: {
-      userId: userId,
+      id: userId,
     },
     data: data,
   });
@@ -42,9 +44,13 @@ const updateUserProfile = async (
 };
 
 const deleteUserProfile = async (userId: string): Promise<void> => {
-  await prisma.userProfile.delete({
+  await prisma.user.update({
     where: {
-      userId: userId,
+      id: userId,
+    },
+    data: {
+      accountStatus: AccountStatus.DELETIONPENDING,
+      deletedAt: new Date(),
     },
   });
 };
