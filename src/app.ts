@@ -1,4 +1,4 @@
-import express, { Application, Request, Response, NextFunction } from 'express';
+import express, { Application, Request, Response } from 'express';
 import { IndexRouters } from './app/routes';
 import { AuthRoutes } from './app/module/auth/auth.route';
 import { toNodeHandler } from 'better-auth/node';
@@ -23,15 +23,15 @@ app.use(express.json());
 app.use('/api/v1/', IndexRouters);
 
 app.get('/', (req: Request, res: Response) => {
-  res.send('Hello, TypeScript + Express!');
+  res.send('Safetify!');
 });
 
 // Global error handler
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+app.use((err: unknown, req: Request, res: Response) => {
   console.error("Unhandled error:", err);
-  res.status(err?.statusCode || 500).json({
+  res.status((err as { statusCode?: number })?.statusCode || 500).json({
     success: false,
-    message: err?.message || "Internal server error",
+    message: (err as { message?: string })?.message || "Internal server error",
   });
 });
 
