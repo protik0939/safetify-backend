@@ -30,15 +30,15 @@ export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
   advanced: {
     cookiePrefix: "better-auth",
-    useSecureCookies: process.env.NODE_ENV === "production",
+    useSecureCookies: process.env.NODE_ENV === "production" || !!process.env.BETTER_AUTH_URL?.includes("ngrok-free.dev"),
     crossSubDomainCookies: {
       enabled: false,
     },
     disableCSRFCheck: true,
     generateSessionToken: undefined,
     defaultCookieAttributes: {
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      secure: process.env.NODE_ENV === "production",
+      sameSite: (process.env.NODE_ENV === "production" || !!process.env.BETTER_AUTH_URL?.includes("ngrok-free.dev")) ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production" || !!process.env.BETTER_AUTH_URL?.includes("ngrok-free.dev"),
       httpOnly: true,
       path: "/",
     },
