@@ -3,6 +3,7 @@ import { IndexRouters } from './app/routes';
 import { AuthRoutes } from './app/module/auth/auth.route';
 import { toNodeHandler } from 'better-auth/node';
 import { auth } from './app/lib/auth';
+import { NextFunction } from "express";
 
 const app: Application = express();
 
@@ -27,12 +28,24 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 // Global error handler
-app.use((err: unknown, req: Request, res: Response) => {
-  console.error("Unhandled error:", err);
-  res.status((err as { statusCode?: number })?.statusCode || 500).json({
-    success: false,
-    message: (err as { message?: string })?.message || "Internal server error",
-  });
-});
+app.use(
+  (
+    err: unknown,
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    console.error("Unhandled error:", err);
+
+    res.status(
+      (err as { statusCode?: number })?.statusCode || 500
+    ).json({
+      success: false,
+      message:
+        (err as { message?: string })?.message ||
+        "Internal server error",
+    });
+  }
+);
 
 export default app;
