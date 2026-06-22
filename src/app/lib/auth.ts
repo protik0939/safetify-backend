@@ -22,6 +22,27 @@ export const auth = betterAuth({
     "safetify://",
     process.env.BETTER_AUTH_URL || "http://localhost:5000",
   ],
+  session: {
+    cookieCache: {
+      enabled: false,
+    },
+  },
+  secret: process.env.BETTER_AUTH_SECRET,
+  advanced: {
+    cookiePrefix: "better-auth",
+    useSecureCookies: process.env.NODE_ENV === "production",
+    crossSubDomainCookies: {
+      enabled: false,
+    },
+    disableCSRFCheck: true,
+    generateSessionToken: undefined,
+    defaultCookieAttributes: {
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      path: "/",
+    },
+  },
   user: {
     additionalFields: {
       role: {
