@@ -43,9 +43,10 @@ app.use((req, res, next) => {
               break;
             }
           }
+          console.log("[redirect-interceptor] Redirect location:", location, "Cookies:", cookies, "Extracted token:", token);
           if (token) {
             const separator = location.includes('?') ? '&' : '?';
-            location = `${location}${separator}token=${token}`;
+            location = `${location}${separator}token=${encodeURIComponent(token)}`;
             res.setHeader('location', location);
           }
         }
