@@ -1,6 +1,6 @@
 export interface ICreateIncident {
   userId: string;
-  title: string;
+  title?: string;
   description?: string;
   latitude: number;
   longitude: number;

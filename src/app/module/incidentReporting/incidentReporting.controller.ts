@@ -16,7 +16,9 @@ const createIncident = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllIncidents = catchAsync(async (req: Request, res: Response) => {
-  const result = await IncidentReportingService.getAllIncidents();
+  const limit = req.query.limit ? Number(req.query.limit) : undefined;
+  const offset = req.query.offset ? Number(req.query.offset) : undefined;
+  const result = await IncidentReportingService.getAllIncidents(limit, offset);
 
   sendResponse(res, {
     httpStatusCode: 200,

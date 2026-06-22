@@ -4,10 +4,10 @@ const createIncidentSchema = z.object({
   body: z.object({
     userId: z.string({ message: "User ID is required" }),
     title: z
-      .string({ message: "Title is required" })
+      .string()
       .trim()
-      .min(1, "Title must not be empty")
-      .max(200, "Title must not exceed 200 characters"),
+      .max(200, "Title must not exceed 200 characters")
+      .optional(),
     description: z
       .string()
       .trim()

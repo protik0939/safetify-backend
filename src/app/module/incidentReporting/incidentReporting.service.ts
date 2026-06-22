@@ -6,7 +6,7 @@ const createIncident = async (payload: ICreateIncident): Promise<incident> => {
   const incident = await prisma.incident.create({
     data: {
       userId: payload.userId,
-      title: payload.title,
+      title: payload.title || "SOS Emergency",
       description: payload.description,
       latitude: payload.latitude,
       longitude: payload.longitude,
@@ -24,9 +24,11 @@ const createIncident = async (payload: ICreateIncident): Promise<incident> => {
   return incident;
 };
 
-const getAllIncidents = async (): Promise<incident[]> => {
+const getAllIncidents = async (limit?: number, offset?: number): Promise<incident[]> => {
   const incidents = await prisma.incident.findMany({
     orderBy: { createdAt: "desc" },
+    take: limit,
+    skip: offset,
     include: {
       user: {
         select: {
