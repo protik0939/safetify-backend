@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 import { AccountStatus, Role } from "@prisma/client";
+import { bearer } from "better-auth/plugins";
 
 export const auth = betterAuth({
   basePath: "/api/v1/auth",
@@ -9,6 +10,9 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
+  plugins: [
+    bearer()
+  ],
   emailAndPassword: {
     enabled: true,
   },
