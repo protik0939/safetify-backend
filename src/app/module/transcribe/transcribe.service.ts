@@ -1,9 +1,21 @@
 import speech from '@google-cloud/speech';
 import path from 'path';
 
-const client = new speech.SpeechClient({
-  keyFilename: path.resolve(process.cwd(), 'google-services-key.json'),
-});
+const clientOptions: any = {};
+
+if (process.env.GOOGLE_CREDENTIALS_JSON) {
+  try {
+    clientOptions.credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
+    console.log('[TranscribeService] Google SpeechClient initialized using credentials JSON.');
+  } catch (err) {
+    console.error('[TranscribeService] Failed to parse GOOGLE_CREDENTIALS_JSON environment variable:', err);
+  }
+} else {
+  clientOptions.keyFilename = path.resolve(process.cwd(), 'google-services-key.json');
+  console.log('[TranscribeService] Google SpeechClient fallback to local keyfile.');
+}
+
+const client = new speech.SpeechClient(clientOptions);
 
 export const TranscribeService = {
   transcribeAudio: async (base64Audio: string, format: 'wav' | 'amr') => {
