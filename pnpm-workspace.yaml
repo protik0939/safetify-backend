@@ -3,3 +3,4 @@ allowBuilds:
   esbuild: true
   ngrok: true
   prisma: true
+  protobufjs: true

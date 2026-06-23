@@ -1,0 +1,34 @@
+export async function sendPushNotification(
+  expoPushToken: string,
+  title: string,
+  body: string,
+  data?: Record<string, any>
+): Promise<any> {
+  if (!expoPushToken || !expoPushToken.startsWith('ExponentPushToken')) {
+    console.warn('[Push Notification] Invalid or missing token:', expoPushToken);
+    return null;
+  }
+
+  try {
+    const res = await fetch('https://exp.host/--/api/v2/push/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        to: expoPushToken,
+        title,
+        body,
+        data,
+      }),
+    });
+
+    const result = await res.json();
+    console.log('[Push Notification] Send response:', JSON.stringify(result));
+    return result;
+  } catch (error) {
+    console.error('[Push Notification] Error sending push notification:', error);
+    throw error;
+  }
+}
