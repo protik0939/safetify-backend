@@ -4,7 +4,7 @@ export async function sendPushNotification(
   body: string,
   data?: Record<string, any>
 ): Promise<any> {
-  if (!expoPushToken || !expoPushToken.startsWith('ExponentPushToken')) {
+  if (!expoPushToken || (!expoPushToken.startsWith('ExponentPushToken') && !expoPushToken.startsWith('ExpoPushToken'))) {
     console.warn('[Push Notification] Invalid or missing token:', expoPushToken);
     return null;
   }
