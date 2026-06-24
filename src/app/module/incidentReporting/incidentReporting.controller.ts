@@ -42,14 +42,39 @@ const createIncident = catchAsync(async (req: Request, res: Response) => {
       for (const otherUser of otherUsers) {
         if (!otherUser.location || !otherUser.pushToken) continue;
         try {
-          const userLoc = JSON.parse(otherUser.location);
-          if (userLoc.latitude === undefined || userLoc.longitude === undefined) continue;
+          let latitude: number | undefined;
+          let longitude: number | undefined;
+
+          try {
+            const userLoc = JSON.parse(otherUser.location);
+            if (userLoc && typeof userLoc.latitude === 'number' && typeof userLoc.longitude === 'number') {
+              latitude = userLoc.latitude;
+              longitude = userLoc.longitude;
+            } else if (userLoc && typeof userLoc.latitude === 'string' && typeof userLoc.longitude === 'string') {
+              latitude = parseFloat(userLoc.latitude);
+              longitude = parseFloat(userLoc.longitude);
+            }
+          } catch {
+            const parts = otherUser.location.split(',');
+            if (parts.length === 2) {
+              const lat = parseFloat(parts[0]);
+              const lng = parseFloat(parts[1]);
+              if (!isNaN(lat) && !isNaN(lng)) {
+                latitude = lat;
+                longitude = lng;
+              }
+            }
+          }
+
+          if (latitude === undefined || longitude === undefined || isNaN(latitude) || isNaN(longitude)) {
+            continue;
+          }
 
           const distance = getDistanceInKm(
             result.latitude,
             result.longitude,
-            userLoc.latitude,
-            userLoc.longitude
+            latitude,
+            longitude
           );
 
           if (distance <= 1.0) { // 1.0 kilometer

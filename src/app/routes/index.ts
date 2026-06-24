@@ -5,7 +5,6 @@ import { SecurityPersonnelProfileRoute } from "../module/securityPersonnelProfil
 import { AdminProfileRoute } from "../module/adminProfile/adminProfile.route";
 import { SuperAdminProfileRoute } from "../module/superAdminProfile/superAdminProfile.route";
 import { IncidentReportingRoute } from "../module/incidentReporting/incidentReporting.route";
-import { TranscribeRoute } from "../module/transcribe/transcribe.route";
 import { LocationRoute } from "../module/location/location.route";
 import { ResponderRoute } from "../module/responder/responder.route";
 
@@ -18,7 +17,6 @@ router.use("/security-personnel-profile", SecurityPersonnelProfileRoute);
 router.use("/admin-profile", AdminProfileRoute);
 router.use("/super-admin-profile", SuperAdminProfileRoute);
 router.use("/incidents", IncidentReportingRoute);
-router.use("/transcribe", TranscribeRoute);
 router.use("/user", LocationRoute);
 router.use("/incidents", ResponderRoute);
 

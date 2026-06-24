@@ -2,7 +2,7 @@
 import express from "express";
 
 // src/app/routes/index.ts
-import { Router as Router10 } from "express";
+import { Router as Router9 } from "express";
 
 // src/app/module/emergencyContact/emergencyContact.route.ts
 import { Router } from "express";
@@ -1028,13 +1028,36 @@ var createIncident2 = catchAsync(async (req, res) => {
       for (const otherUser of otherUsers) {
         if (!otherUser.location || !otherUser.pushToken) continue;
         try {
-          const userLoc = JSON.parse(otherUser.location);
-          if (userLoc.latitude === void 0 || userLoc.longitude === void 0) continue;
+          let latitude;
+          let longitude;
+          try {
+            const userLoc = JSON.parse(otherUser.location);
+            if (userLoc && typeof userLoc.latitude === "number" && typeof userLoc.longitude === "number") {
+              latitude = userLoc.latitude;
+              longitude = userLoc.longitude;
+            } else if (userLoc && typeof userLoc.latitude === "string" && typeof userLoc.longitude === "string") {
+              latitude = parseFloat(userLoc.latitude);
+              longitude = parseFloat(userLoc.longitude);
+            }
+          } catch {
+            const parts = otherUser.location.split(",");
+            if (parts.length === 2) {
+              const lat = parseFloat(parts[0]);
+              const lng = parseFloat(parts[1]);
+              if (!isNaN(lat) && !isNaN(lng)) {
+                latitude = lat;
+                longitude = lng;
+              }
+            }
+          }
+          if (latitude === void 0 || longitude === void 0 || isNaN(latitude) || isNaN(longitude)) {
+            continue;
+          }
           const distance = getDistanceInKm(
             result.latitude,
             result.longitude,
-            userLoc.latitude,
-            userLoc.longitude
+            latitude,
+            longitude
           );
           if (distance <= 1) {
             await sendPushNotification(
@@ -1189,86 +1212,8 @@ router6.put(
 router6.delete("/:id", IncidentReportingController.deleteIncident);
 var IncidentReportingRoute = router6;
 
-// src/app/module/transcribe/transcribe.route.ts
-import { Router as Router7 } from "express";
-
-// src/app/module/transcribe/transcribe.service.ts
-import speech from "@google-cloud/speech";
-import path2 from "path";
-var client = new speech.SpeechClient({
-  keyFilename: path2.resolve(process.cwd(), "google-services-key.json")
-});
-var TranscribeService = {
-  transcribeAudio: async (base64Audio, format) => {
-    const isWav = format === "wav";
-    const request = {
-      audio: {
-        content: base64Audio
-      },
-      config: {
-        encoding: isWav ? "LINEAR16" : "AMR_WB",
-        sampleRateHertz: 16e3,
-        languageCode: "en-US",
-        alternativeLanguageCodes: ["bn-BD", "hi-IN", "es-ES"]
-      }
-    };
-    try {
-      const [response] = await client.recognize(request);
-      const transcription = response.results?.map((result) => result.alternatives?.[0]?.transcript).join("\n") || "";
-      const detectedLanguageCode = response.results?.[0]?.languageCode || "en-US";
-      return {
-        text: transcription,
-        languageCode: detectedLanguageCode
-      };
-    } catch (error) {
-      console.error("[TranscribeService] Error in Google Speech recognition:", error);
-      throw error;
-    }
-  }
-};
-
-// src/app/module/transcribe/transcribe.controller.ts
-var TranscribeController = {
-  transcribe: async (req, res) => {
-    try {
-      const { audio, format } = req.body;
-      if (!audio) {
-        res.status(400).json({
-          success: false,
-          message: "Audio data (base64 string) is required."
-        });
-        return;
-      }
-      if (!format || !["wav", "amr"].includes(format)) {
-        res.status(400).json({
-          success: false,
-          message: 'Audio format must be either "wav" or "amr".'
-        });
-        return;
-      }
-      const result = await TranscribeService.transcribeAudio(audio, format);
-      res.status(200).json({
-        success: true,
-        message: "Speech transcribed successfully.",
-        data: result
-      });
-    } catch (error) {
-      console.error("[TranscribeController] Error in transcribe:", error);
-      res.status(500).json({
-        success: false,
-        message: error.message || "Failed to transcribe audio."
-      });
-    }
-  }
-};
-
-// src/app/module/transcribe/transcribe.route.ts
-var router7 = Router7();
-router7.post("/", TranscribeController.transcribe);
-var TranscribeRoute = router7;
-
 // src/app/module/location/location.route.ts
-import { Router as Router8 } from "express";
+import { Router as Router7 } from "express";
 
 // src/app/module/location/location.controller.ts
 var notificationCooldowns = /* @__PURE__ */ new Map();
@@ -1389,13 +1334,13 @@ var LocationController = {
 };
 
 // src/app/module/location/location.route.ts
-var router8 = Router8();
-router8.post("/location", LocationController.updateLocation);
-router8.post("/push-token", LocationController.updatePushToken);
-var LocationRoute = router8;
+var router7 = Router7();
+router7.post("/location", LocationController.updateLocation);
+router7.post("/push-token", LocationController.updatePushToken);
+var LocationRoute = router7;
 
 // src/app/module/responder/responder.route.ts
-import { Router as Router9 } from "express";
+import { Router as Router8 } from "express";
 
 // src/app/websocket.ts
 import { WebSocketServer, WebSocket } from "ws";
@@ -1418,9 +1363,9 @@ function broadcastRoomUpdate(incidentId) {
       totalResponders: activeUsers.filter((u) => u.role === "responder").length
     }
   });
-  for (const client2 of room) {
-    if (client2.ws.readyState === WebSocket.OPEN) {
-      client2.ws.send(message);
+  for (const client of room) {
+    if (client.ws.readyState === WebSocket.OPEN) {
+      client.ws.send(message);
     }
   }
 }
@@ -1510,25 +1455,24 @@ var ResponderController = {
 };
 
 // src/app/module/responder/responder.route.ts
-var router9 = Router9();
-router9.post("/:id/respond", ResponderController.respondToIncident);
-var ResponderRoute = router9;
+var router8 = Router8();
+router8.post("/:id/respond", ResponderController.respondToIncident);
+var ResponderRoute = router8;
 
 // src/app/routes/index.ts
-var router10 = Router10();
-router10.use("/emergency-contact", EmergencyContactRoute);
-router10.use("/user", UserProfileRoute);
-router10.use("/security-personnel-profile", SecurityPersonnelProfileRoute);
-router10.use("/admin-profile", AdminProfileRoute);
-router10.use("/super-admin-profile", SuperAdminProfileRoute);
-router10.use("/incidents", IncidentReportingRoute);
-router10.use("/transcribe", TranscribeRoute);
-router10.use("/user", LocationRoute);
-router10.use("/incidents", ResponderRoute);
-var IndexRouters = router10;
+var router9 = Router9();
+router9.use("/emergency-contact", EmergencyContactRoute);
+router9.use("/user", UserProfileRoute);
+router9.use("/security-personnel-profile", SecurityPersonnelProfileRoute);
+router9.use("/admin-profile", AdminProfileRoute);
+router9.use("/super-admin-profile", SuperAdminProfileRoute);
+router9.use("/incidents", IncidentReportingRoute);
+router9.use("/user", LocationRoute);
+router9.use("/incidents", ResponderRoute);
+var IndexRouters = router9;
 
 // src/app/module/auth/auth.route.ts
-import { Router as Router11 } from "express";
+import { Router as Router10 } from "express";
 
 // src/app/module/auth/auth.service.ts
 import { AccountStatus as AccountStatus3 } from "@prisma/client";
@@ -1785,10 +1729,10 @@ var AuthValidation = {
 };
 
 // src/app/module/auth/auth.route.ts
-var router11 = Router11();
-router11.post("/register", validateRequest(AuthValidation.registerSchema), AuthController.registerUser);
-router11.post("/login", validateRequest(AuthValidation.loginSchema), AuthController.loginUser);
-router11.get("/social-login", catchAsync(async (req, res) => {
+var router10 = Router10();
+router10.post("/register", validateRequest(AuthValidation.registerSchema), AuthController.registerUser);
+router10.post("/login", validateRequest(AuthValidation.loginSchema), AuthController.loginUser);
+router10.get("/social-login", catchAsync(async (req, res) => {
   const provider = req.query.provider;
   const callbackURL = req.query.callbackURL;
   if (!provider || !callbackURL) {
@@ -1816,7 +1760,7 @@ router11.get("/social-login", catchAsync(async (req, res) => {
   }
   res.redirect(url);
 }));
-router11.get("/session", catchAsync(async (req, res) => {
+router10.get("/session", catchAsync(async (req, res) => {
   console.log("[auth.route /session] Incoming authorization:", req.headers.authorization);
   const session = await auth.api.getSession({
     headers: req.headers
@@ -1829,7 +1773,7 @@ router11.get("/session", catchAsync(async (req, res) => {
     data: session
   });
 }));
-var AuthRoutes = router11;
+var AuthRoutes = router10;
 
 // src/app.ts
 import { toNodeHandler } from "better-auth/node";
