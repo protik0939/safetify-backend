@@ -21,7 +21,7 @@ export async function sendPushNotification(
         title,
         body,
         sound: 'alert.mp3',
-        channelId: 'safetify-alerts',
+        channelId: 'safetify-alerts-v2',
         data,
       }),
     });
