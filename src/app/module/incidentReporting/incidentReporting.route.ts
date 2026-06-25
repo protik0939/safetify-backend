@@ -12,6 +12,7 @@ router.post(
 );
 router.get("/", IncidentReportingController.getAllIncidents);
 router.get("/user/:userId", IncidentReportingController.getIncidentsByUserId);
+router.get("/history/:userId", IncidentReportingController.getIncidentHistoryByUserId);
 router.get("/:id", IncidentReportingController.getIncidentById);
 router.put(
   "/:id",

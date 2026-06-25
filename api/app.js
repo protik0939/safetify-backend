@@ -1,3 +1,11 @@
+import {
+  sendPushNotification
+} from "./chunk-K6LWXHC4.js";
+import {
+  broadcastRoomUpdate,
+  prisma
+} from "./chunk-IC2Y273Q.js";
+
 // src/app.ts
 import express from "express";
 
@@ -6,14 +14,6 @@ import { Router as Router9 } from "express";
 
 // src/app/module/emergencyContact/emergencyContact.route.ts
 import { Router } from "express";
-
-// src/app/lib/prisma.ts
-import "dotenv/config";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "@prisma/client";
-var connectionString = `${process.env.DATABASE_URL}`;
-var adapter = new PrismaPg({ connectionString });
-var prisma = new PrismaClient({ adapter });
 
 // src/app/module/emergencyContact/emergencyContact.service.ts
 var createEmergencyContact = async (Payload) => {
@@ -273,7 +273,7 @@ var AccountStatus = {
 
 // src/generated/prisma/client.ts
 globalThis["__dirname"] = path.dirname(fileURLToPath(import.meta.url));
-var PrismaClient2 = getPrismaClientClass();
+var PrismaClient = getPrismaClientClass();
 
 // src/app/module/userProfile/userProfile.service.ts
 var createUserProfile = async (payload) => {
@@ -950,6 +950,44 @@ var getIncidentsByUserId = async (userId) => {
   });
   return incidents;
 };
+var getIncidentHistoryByUserId = async (userId) => {
+  const incidents = await prisma.incident.findMany({
+    where: {
+      OR: [
+        { userId },
+        {
+          incidentResponders: {
+            some: {
+              responderId: userId
+            }
+          }
+        }
+      ]
+    },
+    orderBy: { createdAt: "desc" },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true
+        }
+      },
+      incidentResponders: {
+        include: {
+          responder: {
+            select: {
+              id: true,
+              name: true,
+              email: true
+            }
+          }
+        }
+      }
+    }
+  });
+  return incidents;
+};
 var updateIncident = async (id, data) => {
   const incident = await prisma.incident.update({
     where: { id },
@@ -967,114 +1005,46 @@ var IncidentReportingService = {
   getAllIncidents,
   getIncidentById,
   getIncidentsByUserId,
+  getIncidentHistoryByUserId,
   updateIncident,
   deleteIncident
 };
 
-// src/app/utills/pushNotification.ts
-async function sendPushNotification(expoPushToken, title, body, data) {
-  if (!expoPushToken || !expoPushToken.startsWith("ExponentPushToken")) {
-    console.warn("[Push Notification] Invalid or missing token:", expoPushToken);
-    return null;
-  }
-  try {
-    const res = await fetch("https://exp.host/--/api/v2/push/send", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-      },
-      body: JSON.stringify({
-        to: expoPushToken,
-        title,
-        body,
-        data
-      })
-    });
-    const result = await res.json();
-    console.log("[Push Notification] Send response:", JSON.stringify(result));
-    return result;
-  } catch (error) {
-    console.error("[Push Notification] Error sending push notification:", error);
-    throw error;
-  }
-}
-
 // src/app/module/incidentReporting/incidentReporting.controller.ts
-function getDistanceInKm(lat1, lon1, lat2, lon2) {
-  const R = 6371;
-  const dLat = deg2rad(lat2 - lat1);
-  const dLon = deg2rad(lon2 - lon1);
-  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
-function deg2rad(deg) {
-  return deg * (Math.PI / 180);
-}
 var createIncident2 = catchAsync(async (req, res) => {
   const payload = req.body;
   const result = await IncidentReportingService.createIncident(payload);
   if (result.severityLevel === "critical" || result.severityLevel === "high") {
     try {
+      const victimUser = await prisma.user.findUnique({
+        where: { id: result.userId },
+        select: { name: true }
+      });
+      const victimName = victimUser?.name || "Someone";
       const otherUsers = await prisma.user.findMany({
         where: {
           id: { not: result.userId },
-          pushToken: { not: null },
-          location: { not: null }
+          pushToken: { not: null }
         },
-        select: { id: true, name: true, pushToken: true, location: true }
+        select: { id: true, name: true, pushToken: true }
       });
       for (const otherUser of otherUsers) {
-        if (!otherUser.location || !otherUser.pushToken) continue;
+        if (!otherUser.pushToken) continue;
         try {
-          let latitude;
-          let longitude;
-          try {
-            const userLoc = JSON.parse(otherUser.location);
-            if (userLoc && typeof userLoc.latitude === "number" && typeof userLoc.longitude === "number") {
-              latitude = userLoc.latitude;
-              longitude = userLoc.longitude;
-            } else if (userLoc && typeof userLoc.latitude === "string" && typeof userLoc.longitude === "string") {
-              latitude = parseFloat(userLoc.latitude);
-              longitude = parseFloat(userLoc.longitude);
+          await sendPushNotification(
+            otherUser.pushToken,
+            "\u{1F6A8} Someone is in danger!",
+            `${victimName} triggered an emergency SOS. Tap to help.`,
+            {
+              type: "sos_alert",
+              incidentId: result.id,
+              latitude: result.latitude,
+              longitude: result.longitude
             }
-          } catch {
-            const parts = otherUser.location.split(",");
-            if (parts.length === 2) {
-              const lat = parseFloat(parts[0]);
-              const lng = parseFloat(parts[1]);
-              if (!isNaN(lat) && !isNaN(lng)) {
-                latitude = lat;
-                longitude = lng;
-              }
-            }
-          }
-          if (latitude === void 0 || longitude === void 0 || isNaN(latitude) || isNaN(longitude)) {
-            continue;
-          }
-          const distance = getDistanceInKm(
-            result.latitude,
-            result.longitude,
-            latitude,
-            longitude
           );
-          if (distance <= 1) {
-            await sendPushNotification(
-              otherUser.pushToken,
-              "\u{1F6A8} Someone is in danger near you!",
-              `Emergency SOS triggered nearby. Tap to help.`,
-              {
-                type: "sos_alert",
-                incidentId: result.id,
-                latitude: result.latitude,
-                longitude: result.longitude
-              }
-            );
-            console.log(`[Incident Alert] Sent nearby alert to ${otherUser.name} for SOS ${result.id}`);
-          }
+          console.log(`[Incident Alert] Sent alert to ${otherUser.name} for SOS ${result.id}`);
         } catch (err) {
-          console.error(`[Incident Alert] Failed to parse/send alert to user ${otherUser.id}:`, err);
+          console.error(`[Incident Alert] Failed to send alert to user ${otherUser.id}:`, err);
         }
       }
     } catch (err) {
@@ -1121,6 +1091,18 @@ var getIncidentsByUserId2 = catchAsync(
     });
   }
 );
+var getIncidentHistoryByUserId2 = catchAsync(
+  async (req, res) => {
+    const userId = Array.isArray(req.params.userId) ? req.params.userId[0] : req.params.userId;
+    const result = await IncidentReportingService.getIncidentHistoryByUserId(userId);
+    sendResponse(res, {
+      httpStatusCode: 200,
+      success: true,
+      message: "Incident history retrieved successfully",
+      data: result
+    });
+  }
+);
 var updateIncident2 = catchAsync(async (req, res) => {
   const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const payload = req.body;
@@ -1146,6 +1128,7 @@ var IncidentReportingController = {
   getAllIncidents: getAllIncidents2,
   getIncidentById: getIncidentById2,
   getIncidentsByUserId: getIncidentsByUserId2,
+  getIncidentHistoryByUserId: getIncidentHistoryByUserId2,
   updateIncident: updateIncident2,
   deleteIncident: deleteIncident2
 };
@@ -1203,6 +1186,7 @@ router6.post(
 );
 router6.get("/", IncidentReportingController.getAllIncidents);
 router6.get("/user/:userId", IncidentReportingController.getIncidentsByUserId);
+router6.get("/history/:userId", IncidentReportingController.getIncidentHistoryByUserId);
 router6.get("/:id", IncidentReportingController.getIncidentById);
 router6.put(
   "/:id",
@@ -1217,15 +1201,15 @@ import { Router as Router7 } from "express";
 
 // src/app/module/location/location.controller.ts
 var notificationCooldowns = /* @__PURE__ */ new Map();
-function getDistanceInKm2(lat1, lon1, lat2, lon2) {
+function getDistanceInKm(lat1, lon1, lat2, lon2) {
   const R = 6371;
-  const dLat = deg2rad2(lat2 - lat1);
-  const dLon = deg2rad2(lon2 - lon1);
-  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(deg2rad2(lat1)) * Math.cos(deg2rad2(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const dLat = deg2rad(lat2 - lat1);
+  const dLon = deg2rad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
-function deg2rad2(deg) {
+function deg2rad(deg) {
   return deg * (Math.PI / 180);
 }
 var LocationController = {
@@ -1259,7 +1243,7 @@ var LocationController = {
       const triggeredAlerts = [];
       for (const incident of activeIncidents) {
         if (incident.userId === userId) continue;
-        const distance = getDistanceInKm2(latitude, longitude, incident.latitude, incident.longitude);
+        const distance = getDistanceInKm(latitude, longitude, incident.latitude, incident.longitude);
         if (distance <= 0.5) {
           const cooldownKey = `${userId}_${incident.id}`;
           const lastNotified = notificationCooldowns.get(cooldownKey) || 0;
@@ -1341,34 +1325,6 @@ var LocationRoute = router7;
 
 // src/app/module/responder/responder.route.ts
 import { Router as Router8 } from "express";
-
-// src/app/websocket.ts
-import { WebSocketServer, WebSocket } from "ws";
-var rooms = /* @__PURE__ */ new Map();
-function broadcastRoomUpdate(incidentId) {
-  const room = rooms.get(incidentId);
-  if (!room) return;
-  const activeUsers = Array.from(room).map((c) => ({
-    userId: c.userId,
-    name: c.name,
-    role: c.role,
-    lat: c.lat,
-    lng: c.lng
-  }));
-  const message = JSON.stringify({
-    type: "sos_state",
-    data: {
-      incidentId,
-      users: activeUsers,
-      totalResponders: activeUsers.filter((u) => u.role === "responder").length
-    }
-  });
-  for (const client of room) {
-    if (client.ws.readyState === WebSocket.OPEN) {
-      client.ws.send(message);
-    }
-  }
-}
 
 // src/app/module/responder/responder.controller.ts
 var ResponderController = {
@@ -1590,12 +1546,18 @@ var registerUser = async (payload) => {
       name,
       email,
       password
-      // role: Role.USER,
-      // accountStatus: AccountStatus.ACTIVE
     }
   });
   if (!data.user) {
     throw new Error("Failed to register user");
+  }
+  if (email.toLowerCase().endsWith("@gmail.com")) {
+    await prisma.user.update({
+      where: { id: data.user.id },
+      data: { emailVerified: true }
+    });
+    data.user.emailVerified = true;
+    console.log(`[Signup] Auto-verified email for Gmail user ${email}`);
   }
   console.log("Registration data:", data);
   return data;
@@ -1623,12 +1585,105 @@ var loginUser = async (payload) => {
   if (data.user.accountStatus === AccountStatus3.DELETIONPENDING) {
     throw new Error("User account deletion is pending");
   }
+  try {
+    const activeIncidents = await prisma.incident.findMany({
+      where: {
+        userId: data.user.id,
+        status: {
+          notIn: ["resolved", "cancelled"]
+        }
+      }
+    });
+    for (const incident of activeIncidents) {
+      await prisma.incident.update({
+        where: { id: incident.id },
+        data: { status: "resolved" }
+      });
+      try {
+        const { closeActiveSOSRoom } = await import("./websocket-PDUKYNZB.js");
+        closeActiveSOSRoom(incident.id);
+      } catch (wsErr) {
+        console.error(`[WS] Failed to close active SOS room on login:`, wsErr);
+      }
+    }
+  } catch (err) {
+    console.error("[Login] Error closing user's active SOS:", err);
+  }
+  try {
+    if (data.token) {
+      await prisma.session.deleteMany({
+        where: {
+          userId: data.user.id,
+          token: { not: data.token }
+        }
+      });
+      console.log(`[Login] Cleared other sessions for user ${data.user.id}`);
+    }
+  } catch (err) {
+    console.error("[Login] Failed to clear other sessions:", err);
+  }
   console.log("Login data:", data);
   return data;
 };
+var sendOTP = async (email) => {
+  const otp = Math.floor(1e7 + Math.random() * 9e7).toString();
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1e3);
+  await prisma.verification.deleteMany({
+    where: { identifier: email }
+  });
+  await prisma.verification.create({
+    data: {
+      id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+      identifier: email,
+      value: otp,
+      expiresAt
+    }
+  });
+  console.log(`[OTP] Email verification OTP code for ${email} is: ${otp}`);
+  const user = await prisma.user.findUnique({
+    where: { email }
+  });
+  if (user && user.pushToken) {
+    try {
+      const { sendPushNotification: sendPushNotification2 } = await import("./pushNotification-2HGJDC73.js");
+      await sendPushNotification2(
+        user.pushToken,
+        "\u{1F510} Safetify Verification Code",
+        `Your 8-digit verification code is: ${otp}. It expires in 15 minutes.`,
+        { type: "email_verification_otp", otp }
+      );
+      console.log(`[OTP] Sent push notification with OTP to user ${user.id}`);
+    } catch (err) {
+      console.error(`[OTP] Failed to send push notification with OTP to ${email}:`, err);
+    }
+  }
+  return { message: "OTP sent successfully" };
+};
+var verifyOTP = async (email, otp) => {
+  const record = await prisma.verification.findFirst({
+    where: {
+      identifier: email,
+      value: otp,
+      expiresAt: { gt: /* @__PURE__ */ new Date() }
+    }
+  });
+  if (!record) {
+    throw new Error("Invalid or expired verification code");
+  }
+  await prisma.user.update({
+    where: { email },
+    data: { emailVerified: true }
+  });
+  await prisma.verification.delete({
+    where: { id: record.id }
+  });
+  return { message: "Email verified successfully" };
+};
 var AuthService = {
   registerUser,
-  loginUser
+  loginUser,
+  sendOTP,
+  verifyOTP
 };
 
 // src/app/module/auth/auth.controller.ts
@@ -1652,9 +1707,31 @@ var loginUser2 = catchAsync(async (req, res) => {
     data: result
   });
 });
+var sendOTP2 = catchAsync(async (req, res) => {
+  const { email } = req.body;
+  const result = await AuthService.sendOTP(email);
+  sendResponse(res, {
+    httpStatusCode: 200,
+    success: true,
+    message: "OTP sent successfully",
+    data: result
+  });
+});
+var verifyOTP2 = catchAsync(async (req, res) => {
+  const { email, otp } = req.body;
+  const result = await AuthService.verifyOTP(email, otp);
+  sendResponse(res, {
+    httpStatusCode: 200,
+    success: true,
+    message: "Email verified successfully",
+    data: result
+  });
+});
 var AuthController = {
   registerUser: registerUser2,
-  loginUser: loginUser2
+  loginUser: loginUser2,
+  sendOTP: sendOTP2,
+  verifyOTP: verifyOTP2
 };
 
 // src/app/module/auth/auth.validation.ts
@@ -1732,6 +1809,8 @@ var AuthValidation = {
 var router10 = Router10();
 router10.post("/register", validateRequest(AuthValidation.registerSchema), AuthController.registerUser);
 router10.post("/login", validateRequest(AuthValidation.loginSchema), AuthController.loginUser);
+router10.post("/send-otp", AuthController.sendOTP);
+router10.post("/verify-otp", AuthController.verifyOTP);
 router10.get("/social-login", catchAsync(async (req, res) => {
   const provider = req.query.provider;
   const callbackURL = req.query.callbackURL;

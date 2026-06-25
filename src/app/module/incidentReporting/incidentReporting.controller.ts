@@ -25,74 +25,43 @@ const createIncident = catchAsync(async (req: Request, res: Response) => {
   const payload = req.body;
   const result = await IncidentReportingService.createIncident(payload);
 
-  // Trigger nearby alerts for high/critical incidents
+  // Trigger nearby alerts for high/critical incidents (now broadcast to all app users)
   if (result.severityLevel === "critical" || result.severityLevel === "high") {
     try {
-      // 1. Fetch other users with locations and push tokens
+      // Fetch victim name
+      const victimUser = await prisma.user.findUnique({
+        where: { id: result.userId },
+        select: { name: true },
+      });
+      const victimName = victimUser?.name || "Someone";
+
+      // 1. Fetch other users with push tokens
       const otherUsers = await prisma.user.findMany({
         where: {
           id: { not: result.userId },
           pushToken: { not: null },
-          location: { not: null },
         },
-        select: { id: true, name: true, pushToken: true, location: true },
+        select: { id: true, name: true, pushToken: true },
       });
 
-      // 2. Proximity check
+      // 2. Broadcast alerts
       for (const otherUser of otherUsers) {
-        if (!otherUser.location || !otherUser.pushToken) continue;
+        if (!otherUser.pushToken) continue;
         try {
-          let latitude: number | undefined;
-          let longitude: number | undefined;
-
-          try {
-            const userLoc = JSON.parse(otherUser.location);
-            if (userLoc && typeof userLoc.latitude === 'number' && typeof userLoc.longitude === 'number') {
-              latitude = userLoc.latitude;
-              longitude = userLoc.longitude;
-            } else if (userLoc && typeof userLoc.latitude === 'string' && typeof userLoc.longitude === 'string') {
-              latitude = parseFloat(userLoc.latitude);
-              longitude = parseFloat(userLoc.longitude);
+          await sendPushNotification(
+            otherUser.pushToken,
+            "🚨 Someone is in danger!",
+            `${victimName} triggered an emergency SOS. Tap to help.`,
+            {
+              type: "sos_alert",
+              incidentId: result.id,
+              latitude: result.latitude,
+              longitude: result.longitude,
             }
-          } catch {
-            const parts = otherUser.location.split(',');
-            if (parts.length === 2) {
-              const lat = parseFloat(parts[0]);
-              const lng = parseFloat(parts[1]);
-              if (!isNaN(lat) && !isNaN(lng)) {
-                latitude = lat;
-                longitude = lng;
-              }
-            }
-          }
-
-          if (latitude === undefined || longitude === undefined || isNaN(latitude) || isNaN(longitude)) {
-            continue;
-          }
-
-          const distance = getDistanceInKm(
-            result.latitude,
-            result.longitude,
-            latitude,
-            longitude
           );
-
-          if (distance <= 1.0) { // 1.0 kilometer
-            await sendPushNotification(
-              otherUser.pushToken,
-              "🚨 Someone is in danger near you!",
-              `Emergency SOS triggered nearby. Tap to help.`,
-              {
-                type: "sos_alert",
-                incidentId: result.id,
-                latitude: result.latitude,
-                longitude: result.longitude,
-              }
-            );
-            console.log(`[Incident Alert] Sent nearby alert to ${otherUser.name} for SOS ${result.id}`);
-          }
+          console.log(`[Incident Alert] Sent alert to ${otherUser.name} for SOS ${result.id}`);
         } catch (err) {
-          console.error(`[Incident Alert] Failed to parse/send alert to user ${otherUser.id}:`, err);
+          console.error(`[Incident Alert] Failed to send alert to user ${otherUser.id}:`, err);
         }
       }
     } catch (err) {
@@ -149,6 +118,22 @@ const getIncidentsByUserId = catchAsync(
   },
 );
 
+const getIncidentHistoryByUserId = catchAsync(
+  async (req: Request, res: Response) => {
+    const userId = Array.isArray(req.params.userId)
+      ? req.params.userId[0]
+      : req.params.userId;
+    const result = await IncidentReportingService.getIncidentHistoryByUserId(userId);
+
+    sendResponse(res, {
+      httpStatusCode: 200,
+      success: true,
+      message: "Incident history retrieved successfully",
+      data: result,
+    });
+  },
+);
+
 const updateIncident = catchAsync(async (req: Request, res: Response) => {
   const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const payload = req.body;
@@ -178,6 +163,7 @@ export const IncidentReportingController = {
   getAllIncidents,
   getIncidentById,
   getIncidentsByUserId,
+  getIncidentHistoryByUserId,
   updateIncident,
   deleteIncident,
 };

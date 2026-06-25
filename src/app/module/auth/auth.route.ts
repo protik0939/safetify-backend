@@ -10,6 +10,8 @@ const router = Router();
 
 router.post("/register", validateRequest(AuthValidation.registerSchema), AuthController.registerUser);
 router.post("/login", validateRequest(AuthValidation.loginSchema), AuthController.loginUser);
+router.post("/send-otp", AuthController.sendOTP);
+router.post("/verify-otp", AuthController.verifyOTP);
 
 router.get("/social-login", catchAsync(async (req: Request, res: Response) => {
   const provider = req.query.provider as string;

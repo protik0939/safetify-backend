@@ -66,6 +66,45 @@ const getIncidentsByUserId = async (userId: string): Promise<incident[]> => {
   return incidents;
 };
 
+const getIncidentHistoryByUserId = async (userId: string): Promise<any[]> => {
+  const incidents = await prisma.incident.findMany({
+    where: {
+      OR: [
+        { userId },
+        {
+          incidentResponders: {
+            some: {
+              responderId: userId,
+            },
+          },
+        },
+      ],
+    },
+    orderBy: { createdAt: "desc" },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      incidentResponders: {
+        include: {
+          responder: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      },
+    },
+  });
+  return incidents;
+};
+
 const updateIncident = async (
   id: string,
   data: IUpdateIncident,
@@ -88,6 +127,7 @@ export const IncidentReportingService = {
   getAllIncidents,
   getIncidentById,
   getIncidentsByUserId,
+  getIncidentHistoryByUserId,
   updateIncident,
   deleteIncident,
 };

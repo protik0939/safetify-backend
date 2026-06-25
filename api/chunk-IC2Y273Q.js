@@ -1,48 +1,34 @@
-import { Server as HttpServer } from "http";
+// src/app/websocket.ts
 import { WebSocketServer, WebSocket } from "ws";
-import { prisma } from "./lib/prisma";
 
-export interface ClientConnection {
-  ws: WebSocket;
-  userId: string;
-  incidentId: string;
-  role: "victim" | "responder";
-  name: string;
-  lat?: number;
-  lng?: number;
-}
+// src/app/lib/prisma.ts
+import "dotenv/config";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "@prisma/client";
+var connectionString = `${process.env.DATABASE_URL}`;
+var adapter = new PrismaPg({ connectionString });
+var prisma = new PrismaClient({ adapter });
 
-// Global active connections map: roomName -> Set of ClientConnections
-export const rooms = new Map<string, Set<ClientConnection>>();
-
-// Keep track of pending inactivity auto-resolve timeouts for each incidentId
-const inactivityTimeouts = new Map<string, NodeJS.Timeout>();
-
-export function initWebSocketServer(server: HttpServer) {
+// src/app/websocket.ts
+var rooms = /* @__PURE__ */ new Map();
+var inactivityTimeouts = /* @__PURE__ */ new Map();
+function initWebSocketServer(server) {
   const wss = new WebSocketServer({ server, path: "/ws" });
-
   wss.on("connection", (ws) => {
-    let clientInfo: ClientConnection | null = null;
-
-    ws.on("message", async (message: string) => {
+    let clientInfo = null;
+    ws.on("message", async (message) => {
       try {
         const payload = JSON.parse(message);
         const { type, data } = payload;
-
         switch (type) {
           case "join_sos": {
             const { userId, incidentId, role, name, lat, lng } = data;
-
             clientInfo = { ws, userId, incidentId, role, name, lat, lng };
-
             if (!rooms.has(incidentId)) {
-              rooms.set(incidentId, new Set());
+              rooms.set(incidentId, /* @__PURE__ */ new Set());
             }
-            rooms.get(incidentId)!.add(clientInfo);
-
+            rooms.get(incidentId).add(clientInfo);
             console.log(`[WS] User ${name} (${role}) joined SOS incident ${incidentId}`);
-
-            // Cancel any pending inactivity timeout if the victim joins/reconnects
             if (role === "victim") {
               const pendingTimeout = inactivityTimeouts.get(incidentId);
               if (pendingTimeout) {
@@ -51,23 +37,17 @@ export function initWebSocketServer(server: HttpServer) {
                 console.log(`[WS] Cancelled auto-resolve timeout for SOS ${incidentId} (Victim reconnected)`);
               }
             }
-
-            // Broadcast the room update
             broadcastRoomUpdate(incidentId);
             break;
           }
-
           case "update_location": {
             if (clientInfo) {
               clientInfo.lat = data.lat;
               clientInfo.lng = data.lng;
-
-              // Broadcast location update to the room
               broadcastRoomUpdate(clientInfo.incidentId);
             }
             break;
           }
-
           case "ping": {
             ws.send(JSON.stringify({ type: "pong" }));
             break;
@@ -77,7 +57,6 @@ export function initWebSocketServer(server: HttpServer) {
         console.error("[WS] Error handling message:", err);
       }
     });
-
     ws.on("close", () => {
       if (clientInfo) {
         const { incidentId, role, name } = clientInfo;
@@ -90,25 +69,17 @@ export function initWebSocketServer(server: HttpServer) {
             broadcastRoomUpdate(incidentId);
           }
         }
-
-        // If the user who disconnected was the victim, set a 5-hour auto-resolve inactivity timer
         if (role === "victim") {
           console.log(`[WS] Victim ${name} disconnected. Scheduling 5-hour auto-resolve timer for SOS ${incidentId}`);
-          
           const timeout = setTimeout(async () => {
             try {
               console.log(`[WS] Auto-resolving SOS ${incidentId} due to 5 hours of inactivity`);
-              
               const incident = await prisma.incident.findUnique({
                 where: { id: incidentId }
               });
-
               if (incident && incident.status !== "resolved") {
                 const suffix = " (This incident stopped due to long time inactivity)";
-                const newDesc = incident.description 
-                  ? `${incident.description}${suffix}` 
-                  : suffix;
-
+                const newDesc = incident.description ? `${incident.description}${suffix}` : suffix;
                 await prisma.incident.update({
                   where: { id: incidentId },
                   data: {
@@ -117,8 +88,6 @@ export function initWebSocketServer(server: HttpServer) {
                   }
                 });
               }
-
-              // Close any lingering responder connections in the room
               const activeRoom = rooms.get(incidentId);
               if (activeRoom) {
                 const message = JSON.stringify({
@@ -137,48 +106,40 @@ export function initWebSocketServer(server: HttpServer) {
             } catch (err) {
               console.error(`[WS] Failed to auto-resolve SOS ${incidentId}:`, err);
             }
-          }, 5 * 60 * 60 * 1000); // 5 hours in milliseconds
-
+          }, 5 * 60 * 60 * 1e3);
           inactivityTimeouts.set(incidentId, timeout);
         }
-
         console.log(`[WS] User ${name} disconnected from SOS ${incidentId}`);
       }
     });
   });
-
   console.log("[WS] WebSocket Server initialized on path /ws");
 }
-
-export function broadcastRoomUpdate(incidentId: string) {
+function broadcastRoomUpdate(incidentId) {
   const room = rooms.get(incidentId);
   if (!room) return;
-
   const activeUsers = Array.from(room).map((c) => ({
     userId: c.userId,
     name: c.name,
     role: c.role,
     lat: c.lat,
-    lng: c.lng,
+    lng: c.lng
   }));
-
   const message = JSON.stringify({
     type: "sos_state",
     data: {
       incidentId,
       users: activeUsers,
-      totalResponders: activeUsers.filter((u) => u.role === "responder").length,
-    },
+      totalResponders: activeUsers.filter((u) => u.role === "responder").length
+    }
   });
-
   for (const client of room) {
     if (client.ws.readyState === WebSocket.OPEN) {
       client.ws.send(message);
     }
   }
 }
-
-export function closeActiveSOSRoom(incidentId: string) {
+function closeActiveSOSRoom(incidentId) {
   const activeRoom = rooms.get(incidentId);
   if (activeRoom) {
     const message = JSON.stringify({
@@ -199,3 +160,11 @@ export function closeActiveSOSRoom(incidentId: string) {
     inactivityTimeouts.delete(incidentId);
   }
 }
+
+export {
+  prisma,
+  rooms,
+  initWebSocketServer,
+  broadcastRoomUpdate,
+  closeActiveSOSRoom
+};
