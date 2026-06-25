@@ -16,7 +16,7 @@ async function sendPushNotification(expoPushToken, title, body, data) {
         title,
         body,
         sound: "alert.mp3",
-        channelId: "safetify-alerts",
+        channelId: "safetify-alerts-v3",
         data
       })
     });
