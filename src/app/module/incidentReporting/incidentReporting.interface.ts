@@ -12,6 +12,7 @@ export interface ICreateIncident {
   injuryCount?: number;
   peopleHelped?: number;
   stories?: string[];
+  images?: string[];
 }
 
 export interface IUpdateIncident {
@@ -28,4 +29,5 @@ export interface IUpdateIncident {
   injuryCount?: number;
   peopleHelped?: number;
   stories?: string[];
+  images?: string[];
 }

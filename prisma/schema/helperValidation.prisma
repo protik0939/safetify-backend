@@ -1,0 +1,15 @@
+model helperValidation {
+    id          String          @id @default(uuid())
+    incidentId  String
+    incident    incident        @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+    responderId String
+    responder   User            @relation(fields: [responderId], references: [id], onDelete: Cascade)
+    isTrue      Boolean
+    comment     String?
+    createdAt   DateTime        @default(now())
+    updatedAt   DateTime        @updatedAt
+    images      incidentImage[]
+
+    @@unique([incidentId, responderId])
+    @@map("helper_validation")
+}

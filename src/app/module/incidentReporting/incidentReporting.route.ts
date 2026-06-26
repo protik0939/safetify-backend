@@ -20,5 +20,6 @@ router.put(
   IncidentReportingController.updateIncident,
 );
 router.delete("/:id", IncidentReportingController.deleteIncident);
+router.post("/:id/validate", IncidentReportingController.validateIncident);
 
 export const IncidentReportingRoute = router;

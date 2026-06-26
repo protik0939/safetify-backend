@@ -95,4 +95,38 @@ export const ResponderController = {
       });
     }
   },
+
+  abortIncidentResponse: async (req: Request, res: Response) => {
+    try {
+      const { id: incidentId } = req.params as { id: string };
+      const { responderId } = req.body as { responderId: string };
+
+      if (!incidentId || !responderId) {
+        res.status(400).json({
+          success: false,
+          message: 'incidentId and responderId are required.',
+        });
+        return;
+      }
+
+      // Delete responder record from database
+      await prisma.incidentResponder.deleteMany({
+        where: { incidentId, responderId },
+      });
+
+      // Broadcast room update so the responder is removed from the active users list in WebSocket
+      broadcastRoomUpdate(incidentId);
+
+      res.status(200).json({
+        success: true,
+        message: 'Aborted incident response successfully.',
+      });
+    } catch (error: any) {
+      console.error('[ResponderController] Error aborting incident response:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Failed to abort incident response.',
+      });
+    }
+  },
 };

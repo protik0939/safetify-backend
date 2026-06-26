@@ -158,6 +158,82 @@ const deleteIncident = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const validateIncident = catchAsync(async (req: Request, res: Response) => {
+  const incidentId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  const { responderId, isTrue, comment, images } = req.body;
+
+  if (!responderId) {
+    res.status(400).json({
+      success: false,
+      message: "responderId is required.",
+    });
+    return;
+  }
+
+  // 1. Verify if user is an active responder on this incident
+  const isResponder = await prisma.incidentResponder.findFirst({
+    where: { incidentId, responderId },
+  });
+
+  if (!isResponder) {
+    res.status(403).json({
+      success: false,
+      message: "Only users who tapped 'Going for help' can validate this incident.",
+    });
+    return;
+  }
+
+  // 2. Create or update validation
+  const validation = await prisma.helperValidation.upsert({
+    where: {
+      incidentId_responderId: {
+        incidentId,
+        responderId,
+      },
+    },
+    create: {
+      incidentId,
+      responderId,
+      isTrue: !!isTrue,
+      comment,
+    },
+    update: {
+      isTrue: !!isTrue,
+      comment,
+    },
+  });
+
+  // 3. Handle proof images if provided
+  if (images && Array.isArray(images)) {
+    // Delete existing images associated with this helper validation
+    await prisma.incidentImage.deleteMany({
+      where: {
+        helperValidationId: validation.id,
+      },
+    });
+
+    if (images.length > 0) {
+      await prisma.incidentImage.createMany({
+        data: images.map((url: string) => ({
+          incidentId,
+          url,
+          helperValidationId: validation.id,
+        })),
+      });
+    }
+  }
+
+  // Retrieve the updated incident details
+  const updatedIncident = await IncidentReportingService.getIncidentById(incidentId);
+
+  sendResponse(res, {
+    httpStatusCode: 200,
+    success: true,
+    message: "Incident validation submitted successfully.",
+    data: updatedIncident,
+  });
+});
+
 export const IncidentReportingController = {
   createIncident,
   getAllIncidents,
@@ -166,4 +242,5 @@ export const IncidentReportingController = {
   getIncidentHistoryByUserId,
   updateIncident,
   deleteIncident,
+  validateIncident,
 };

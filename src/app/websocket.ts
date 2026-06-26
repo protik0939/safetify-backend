@@ -6,7 +6,7 @@ export interface ClientConnection {
   ws: WebSocket;
   userId: string;
   incidentId: string;
-  role: "victim" | "responder";
+  role: "victim" | "responder" | "viewer";
   name: string;
   lat?: number;
   lng?: number;
@@ -33,6 +33,19 @@ export function initWebSocketServer(server: HttpServer) {
           case "join_sos": {
             const { userId, incidentId, role, name, lat, lng } = data;
 
+            // Remove any existing connection for this user in this room to avoid duplicate/stale state
+            const existingRoom = rooms.get(incidentId);
+            if (existingRoom) {
+              for (const conn of existingRoom) {
+                if (conn.userId === userId) {
+                  existingRoom.delete(conn);
+                  try {
+                    conn.ws.close();
+                  } catch (e) {}
+                }
+              }
+            }
+
             clientInfo = { ws, userId, incidentId, role, name, lat, lng };
 
             if (!rooms.has(incidentId)) {
@@ -49,6 +62,21 @@ export function initWebSocketServer(server: HttpServer) {
                 clearTimeout(pendingTimeout);
                 inactivityTimeouts.delete(incidentId);
                 console.log(`[WS] Cancelled auto-resolve timeout for SOS ${incidentId} (Victim reconnected)`);
+              }
+
+              // Automatically remove this user as a responder from all other rooms
+              for (const [otherIncidentId, otherRoom] of rooms.entries()) {
+                if (otherIncidentId !== incidentId) {
+                  for (const conn of otherRoom) {
+                    if (conn.userId === userId && conn.role === 'responder') {
+                      otherRoom.delete(conn);
+                      try {
+                        conn.ws.close();
+                      } catch (e) {}
+                      broadcastRoomUpdate(otherIncidentId);
+                    }
+                  }
+                }
               }
             }
 
@@ -154,13 +182,15 @@ export function broadcastRoomUpdate(incidentId: string) {
   const room = rooms.get(incidentId);
   if (!room) return;
 
-  const activeUsers = Array.from(room).map((c) => ({
-    userId: c.userId,
-    name: c.name,
-    role: c.role,
-    lat: c.lat,
-    lng: c.lng,
-  }));
+  const activeUsers = Array.from(room)
+    .filter((c) => c.role !== 'viewer')
+    .map((c) => ({
+      userId: c.userId,
+      name: c.name,
+      role: c.role,
+      lat: c.lat,
+      lng: c.lng,
+    }));
 
   const message = JSON.stringify({
     type: "sos_state",

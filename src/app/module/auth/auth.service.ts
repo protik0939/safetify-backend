@@ -18,15 +18,6 @@ const registerUser = async (payload: IRegisterUser) => {
     throw new Error("Failed to register user");
   }
 
-  if (email.toLowerCase().endsWith("@gmail.com")) {
-    await prisma.user.update({
-      where: { id: data.user.id },
-      data: { emailVerified: true },
-    });
-    data.user.emailVerified = true;
-    console.log(`[Signup] Auto-verified email for Gmail user ${email}`);
-  }
-
   console.log("Registration data:", data);
   return data;
 };
@@ -126,6 +117,14 @@ const sendOTP = async (email: string) => {
   });
 
   console.log(`[OTP] Email verification OTP code for ${email} is: ${otp}`);
+
+  // Send verification email using Nodemailer
+  try {
+    const { sendVerificationEmail } = await import("../../utills/email");
+    await sendVerificationEmail(email, otp);
+  } catch (err) {
+    console.error(`[OTP] Failed to send verification email to ${email}:`, err);
+  }
 
   const user = await prisma.user.findUnique({
     where: { email },

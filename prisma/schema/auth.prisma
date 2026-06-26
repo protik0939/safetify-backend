@@ -17,6 +17,7 @@ model User {
   emergencyContacts        EmergencyContact[]
   incidentResponders       incidentResponder[]
   incidents                incident[]
+  helperValidations        helperValidation[]
 
   contactNo  String?
   bio        String? @default("Safetify User")

@@ -35,6 +35,7 @@ const createIncidentSchema = z.object({
     injuryCount: z.number().int().min(0).optional(),
     peopleHelped: z.number().int().min(0).optional(),
     stories: z.array(z.string()).optional(),
+    images: z.array(z.string()).optional(),
   }),
 });
 
@@ -71,6 +72,7 @@ const updateIncidentSchema = z.object({
       injuryCount: z.number().int().min(0).optional(),
       peopleHelped: z.number().int().min(0).optional(),
       stories: z.array(z.string()).optional(),
+      images: z.array(z.string()).optional(),
     })
     .refine(
       (data) => Object.keys(data).length > 0,

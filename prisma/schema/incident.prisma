@@ -22,6 +22,8 @@ model incident {
     updatedAt          DateTime            @updatedAt
     danzerZones        danzerZone[]
     incidentResponders incidentResponder[]
+    images             incidentImage[]
+    helperValidations  helperValidation[]
 
     @@map("incident")
 }

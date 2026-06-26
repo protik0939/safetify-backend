@@ -1,0 +1,11 @@
+model incidentImage {
+    id                 String            @id @default(uuid())
+    incidentId         String
+    incident           incident          @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+    url                String
+    helperValidationId String?
+    helperValidation   helperValidation? @relation(fields: [helperValidationId], references: [id], onDelete: Cascade)
+    createdAt          DateTime          @default(now())
+
+    @@map("incident_image")
+}
