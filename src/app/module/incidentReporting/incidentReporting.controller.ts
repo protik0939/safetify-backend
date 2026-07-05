@@ -182,18 +182,7 @@ const validateIncident = catchAsync(async (req: Request, res: Response) => {
     return;
   }
 
-  // 1. Verify if user is an active responder on this incident
-  const isResponder = await prisma.incidentResponder.findFirst({
-    where: { incidentId, responderId },
-  });
 
-  if (!isResponder) {
-    res.status(403).json({
-      success: false,
-      message: "Only users who tapped 'Going for help' can validate this incident.",
-    });
-    return;
-  }
 
   // 2. Create or update validation
   const validation = await prisma.helperValidation.upsert({
@@ -233,6 +222,48 @@ const validateIncident = catchAsync(async (req: Request, res: Response) => {
         })),
       });
     }
+  }
+
+  // 4. Send push notification to incident reporter (victim)
+  try {
+    const incident = await prisma.incidentReporting.findUnique({
+      where: { id: incidentId },
+      select: {
+        id: true,
+        title: true,
+        userId: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            pushToken: true,
+          }
+        }
+      }
+    });
+
+    const validator = await prisma.user.findUnique({
+      where: { id: responderId },
+      select: { name: true }
+    });
+
+    if (incident && incident.user && incident.user.pushToken && incident.user.id !== responderId) {
+      const titleStr = `Incident Verified: ${incident.title || "SOS Alert"}`;
+      const bodyStr = `${validator?.name || "A helper"} has verified the status of your incident.`;
+      
+      await sendPushNotification(
+        incident.user.pushToken,
+        titleStr,
+        bodyStr,
+        {
+          type: "incident_verification",
+          incidentId: incident.id,
+        }
+      );
+      console.log(`[IncidentReportingController] Verification push notification sent to victim ${incident.user.name}`);
+    }
+  } catch (pushErr) {
+    console.error('[IncidentReportingController] Failed to send verification push notification:', pushErr);
   }
 
   // Retrieve the updated incident details

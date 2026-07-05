@@ -27,7 +27,7 @@ export async function sendPushNotification(
         to: expoPushToken,
         title,
         body,
-        sound: 'default',
+        sound: 'alert.mp3',
         channelId: 'safetify-alerts-v4',
         data,
         priority: 'high',
