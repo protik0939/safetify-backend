@@ -20,8 +20,8 @@ export async function sendPushNotification(
         to: expoPushToken,
         title,
         body,
-        sound: 'alert.mp3',
-        channelId: 'safetify-alerts-v3',
+        sound: 'default',
+        channelId: 'safetify-alerts-v4',
         data,
       }),
     });
