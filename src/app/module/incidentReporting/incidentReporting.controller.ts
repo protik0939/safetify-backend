@@ -44,11 +44,15 @@ const createIncident = catchAsync(async (req: Request, res: Response) => {
         select: { id: true, name: true, pushToken: true },
       });
 
-      // 2. Broadcast alerts
+      console.log(`[Incident Alert] Broadcasting SOS ${result.id} to ${otherUsers.length} users with push tokens`);
+
+      // 2. Broadcast alerts and track results
+      let successCount = 0;
+      let failCount = 0;
       for (const otherUser of otherUsers) {
         if (!otherUser.pushToken) continue;
         try {
-          await sendPushNotification(
+          const pushResult = await sendPushNotification(
             otherUser.pushToken,
             "🚨 Someone is in danger!",
             `${victimName} triggered an emergency SOS. Tap to help.`,
@@ -59,11 +63,19 @@ const createIncident = catchAsync(async (req: Request, res: Response) => {
               longitude: result.longitude,
             }
           );
-          console.log(`[Incident Alert] Sent alert to ${otherUser.name} for SOS ${result.id}`);
+          if (pushResult.success) {
+            successCount++;
+          } else {
+            failCount++;
+            console.warn(`[Incident Alert] Push failed for ${otherUser.name}: ${pushResult.error}`);
+          }
         } catch (err) {
-          console.error(`[Incident Alert] Failed to send alert to user ${otherUser.id}:`, err);
+          failCount++;
+          console.error(`[Incident Alert] Exception sending alert to user ${otherUser.id}:`, err);
         }
       }
+
+      console.log(`[Incident Alert] SOS ${result.id} broadcast complete: ${successCount} sent, ${failCount} failed, ${otherUsers.length} total targets`);
     } catch (err) {
       console.error("[Incident Alert] General error fetching users for SOS alert:", err);
     }

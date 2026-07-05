@@ -62,7 +62,7 @@ export const ResponderController = {
 
       if (incident && incident.user && incident.user.pushToken) {
         try {
-          await sendPushNotification(
+          const pushResult = await sendPushNotification(
             incident.user.pushToken,
             'Help is on the way!',
             `${responderRecord.responder.name} is coming to help you.`,
@@ -73,9 +73,13 @@ export const ResponderController = {
               responderName: responderRecord.responder.name,
             }
           );
-          console.log(`[ResponderController] Push notification sent to victim ${incident.user.name}`);
+          if (pushResult.success) {
+            console.log(`[ResponderController] Push notification sent to victim ${incident.user.name}`);
+          } else {
+            console.warn(`[ResponderController] Push notification failed for victim ${incident.user.name}: ${pushResult.error}`);
+          }
         } catch (pushErr) {
-          console.error('[ResponderController] Push notification failed:', pushErr);
+          console.error('[ResponderController] Push notification exception:', pushErr);
         }
       }
 
