@@ -8,6 +8,10 @@ const prisma = new PrismaClient({ adapter });
 
 const SEED_USER_EMAIL = "seed@safetify.com";
 
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@safetify.com";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Admin@123";
+const ADMIN_NAME = process.env.ADMIN_NAME || "Super Admin";
+
 async function main() {
   console.log("Seeding incidents...");
 
@@ -475,6 +479,53 @@ async function main() {
   }
 
   console.log(`Seeded ${incidents.length} incidents.`);
+
+  // ── Admin User Seeder ──
+  const adminEmail = ADMIN_EMAIL;
+  let adminUser = await prisma.user.findUnique({ where: { email: adminEmail } });
+
+  if (!adminUser) {
+    console.log("Creating admin user...");
+    try {
+      const { auth } = await import("../src/app/lib/auth");
+
+      const result = await auth.api.signUpEmail({
+        body: {
+          name: ADMIN_NAME,
+          email: adminEmail,
+          password: ADMIN_PASSWORD,
+        },
+      } as any);
+
+      if (result?.user) {
+        adminUser = result.user;
+        console.log(`Created admin user: ${adminUser.id}`);
+
+        await prisma.user.update({
+          where: { id: adminUser.id },
+          data: { role: "SUPERADMIN", emailVerified: true },
+        });
+
+        const existing = await prisma.superAdminProfile.findUnique({
+          where: { userId: adminUser.id },
+        });
+        if (!existing) {
+          await prisma.superAdminProfile.create({
+            data: {
+              id: crypto.randomUUID(),
+              userId: adminUser.id,
+            },
+          });
+        }
+        console.log(`Admin user promoted to SUPERADMIN`);
+      }
+    } catch (err) {
+      console.log(`Admin seeder note: ${err instanceof Error ? err.message : 'Could not create admin via auth API'}`);
+      console.log("You can create the admin manually via the backend's register endpoint.");
+    }
+  } else {
+    console.log(`Admin user already exists: ${adminEmail}`);
+  }
 }
 
 main()

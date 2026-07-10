@@ -10,7 +10,7 @@ const app: Application = express();
 // CORS middleware
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin && (origin.includes("localhost") || origin.includes("ngrok-free.dev") || origin.startsWith("safetify://"))) {
+  if (origin && (origin.includes("localhost") || origin.includes("ngrok-free.dev") || origin.includes("safetify.vercel.app") || origin.startsWith("safetify://"))) {
     res.setHeader("Access-Control-Allow-Origin", origin);
   }
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");

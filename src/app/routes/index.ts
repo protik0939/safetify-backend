@@ -9,6 +9,7 @@ import { LocationRoute } from "../module/location/location.route";
 import { ResponderRoute } from "../module/responder/responder.route";
 import { AppVersionRoute } from "../module/appVersion/appVersion.route";
 import { MLRoute } from "../module/ml/ml.route";
+import { AdminRoute } from "../module/admin/admin.route";
 
 const router = Router();
 
@@ -23,5 +24,6 @@ router.use("/user", LocationRoute);
 router.use("/incidents", ResponderRoute);
 router.use("/app-version", AppVersionRoute);
 router.use("/ml", MLRoute);
+router.use("/admin", AdminRoute);
 
 export const IndexRouters = router;

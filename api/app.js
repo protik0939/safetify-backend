@@ -10,7 +10,7 @@ import {
 import express from "express";
 
 // src/app/routes/index.ts
-import { Router as Router11 } from "express";
+import { Router as Router12 } from "express";
 
 // src/app/module/emergencyContact/emergencyContact.route.ts
 import { Router } from "express";
@@ -2142,22 +2142,427 @@ router10.post(
 );
 var MLRoute = router10;
 
-// src/app/routes/index.ts
+// src/app/module/admin/admin.route.ts
+import { Router as Router11 } from "express";
+
+// src/app/module/admin/admin.service.ts
+var listAllUsers = async (params) => {
+  const { page = 1, limit = 50, search, role, status } = params;
+  const skip = (page - 1) * limit;
+  const where = {};
+  if (search) {
+    where.OR = [
+      { name: { contains: search, mode: "insensitive" } },
+      { email: { contains: search, mode: "insensitive" } },
+      { contactNo: { contains: search } }
+    ];
+  }
+  if (role) {
+    where.role = role;
+  }
+  if (status) {
+    where.accountStatus = status;
+  }
+  const [users, total] = await Promise.all([
+    prisma.user.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      take: limit,
+      skip,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        emailVerified: true,
+        image: true,
+        role: true,
+        accountStatus: true,
+        contactNo: true,
+        bio: true,
+        address: true,
+        bloodGroup: true,
+        gender: true,
+        riskScore: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    }),
+    prisma.user.count({ where })
+  ]);
+  return {
+    users,
+    meta: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit)
+    }
+  };
+};
+var updateUserStatus = async (userId, data) => {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    throw new Error("User not found");
+  }
+  await prisma.user.update({
+    where: { id: userId },
+    data: { accountStatus: data.accountStatus }
+  });
+  return { message: `User status updated to ${data.accountStatus}` };
+};
+var updateUserRole = async (userId, data) => {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    throw new Error("User not found");
+  }
+  await prisma.user.update({
+    where: { id: userId },
+    data: { role: data.role }
+  });
+  return { message: `User role updated to ${data.role}` };
+};
+var getDashboardStats = async () => {
+  const now = /* @__PURE__ */ new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const [
+    totalUsers,
+    totalIncidents,
+    activeIncidents,
+    incidentsToday,
+    incidentsBySeverity,
+    incidentsByDay,
+    recentIncidents,
+    totalResponders
+  ] = await Promise.all([
+    prisma.user.count(),
+    prisma.incident.count(),
+    prisma.incident.count({
+      where: {
+        status: { notIn: ["resolved", "cancelled"] }
+      }
+    }),
+    prisma.incident.count({
+      where: { createdAt: { gte: todayStart } }
+    }),
+    prisma.incident.groupBy({
+      by: ["severityLevel"],
+      _count: { id: true }
+    }),
+    prisma.$queryRaw`
+      SELECT DATE("createdAt") as date, COUNT(*)::int as count
+      FROM incident
+      WHERE "createdAt" >= NOW() - INTERVAL '30 days'
+      GROUP BY DATE("createdAt")
+      ORDER BY date ASC
+    `,
+    prisma.incident.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: {
+        id: true,
+        title: true,
+        severityLevel: true,
+        status: true,
+        createdAt: true,
+        user: {
+          select: { id: true, name: true, email: true }
+        }
+      }
+    }),
+    prisma.incidentResponder.count()
+  ]);
+  const rawDays = incidentsByDay;
+  return {
+    totalUsers,
+    totalIncidents,
+    activeIncidents,
+    incidentsToday,
+    totalResponders,
+    incidentsBySeverity: incidentsBySeverity.map((item) => ({
+      severity: item.severityLevel || "unknown",
+      count: item._count.id
+    })),
+    incidentsByDay: rawDays.map((item) => ({
+      date: new Date(item.date).toISOString().split("T")[0],
+      count: Number(item.count)
+    })),
+    recentIncidents: recentIncidents.map((inc) => ({
+      id: inc.id,
+      title: inc.title,
+      severityLevel: inc.severityLevel,
+      status: inc.status,
+      createdAt: inc.createdAt,
+      user: inc.user
+    }))
+  };
+};
+var broadcastPushNotification = async (payload) => {
+  const users = await prisma.user.findMany({
+    where: {
+      pushToken: { not: null },
+      accountStatus: "ACTIVE"
+    },
+    select: { pushToken: true }
+  });
+  if (users.length === 0) {
+    return { message: "No users with push tokens found", sent: 0 };
+  }
+  let sent = 0;
+  let failed = 0;
+  for (const user of users) {
+    if (user.pushToken) {
+      const result = await sendPushNotification(
+        user.pushToken,
+        payload.title,
+        payload.body,
+        { type: "admin_broadcast" }
+      );
+      if (result.success) {
+        sent++;
+      } else {
+        failed++;
+      }
+    }
+  }
+  return {
+    message: `Broadcast sent to ${sent} users${failed > 0 ? `, ${failed} failed` : ""}`,
+    sent,
+    failed
+  };
+};
+var listAllIncidents = async (params) => {
+  const { page = 1, limit = 50, status, severity } = params;
+  const skip = (page - 1) * limit;
+  const where = {};
+  if (status) where.status = status;
+  if (severity) where.severityLevel = severity;
+  const [incidents, total] = await Promise.all([
+    prisma.incident.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      take: limit,
+      skip,
+      include: {
+        user: { select: { id: true, name: true, email: true } }
+      }
+    }),
+    prisma.incident.count({ where })
+  ]);
+  return {
+    incidents,
+    meta: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit)
+    }
+  };
+};
+var updateIncidentStatus = async (id, status) => {
+  const incident = await prisma.incident.findUnique({ where: { id } });
+  if (!incident) throw new Error("Incident not found");
+  await prisma.incident.update({ where: { id }, data: { status } });
+  return { message: `Incident status updated to ${status}` };
+};
+var deleteIncident3 = async (id) => {
+  const incident = await prisma.incident.findUnique({ where: { id } });
+  if (!incident) throw new Error("Incident not found");
+  await prisma.incident.delete({ where: { id } });
+  return { message: "Incident deleted successfully" };
+};
+var AdminService = {
+  listAllUsers,
+  updateUserStatus,
+  updateUserRole,
+  getDashboardStats,
+  broadcastPushNotification,
+  listAllIncidents,
+  updateIncidentStatus,
+  deleteIncident: deleteIncident3
+};
+
+// src/app/module/admin/admin.controller.ts
+var listAllUsers2 = catchAsync(async (req, res) => {
+  const { page, limit, search, role, status } = req.query;
+  const result = await AdminService.listAllUsers({
+    page: page ? parseInt(page, 10) : void 0,
+    limit: limit ? parseInt(limit, 10) : void 0,
+    search,
+    role,
+    status
+  });
+  sendResponse(res, {
+    httpStatusCode: 200,
+    success: true,
+    message: "Users retrieved successfully",
+    data: result.users,
+    meta: result.meta
+  });
+});
+var updateUserStatus2 = catchAsync(async (req, res) => {
+  const userId = Array.isArray(req.params.userId) ? req.params.userId[0] : req.params.userId;
+  const result = await AdminService.updateUserStatus(userId, req.body);
+  sendResponse(res, {
+    httpStatusCode: 200,
+    success: true,
+    message: result.message
+  });
+});
+var updateUserRole2 = catchAsync(async (req, res) => {
+  const userId = Array.isArray(req.params.userId) ? req.params.userId[0] : req.params.userId;
+  const result = await AdminService.updateUserRole(userId, req.body);
+  sendResponse(res, {
+    httpStatusCode: 200,
+    success: true,
+    message: result.message
+  });
+});
+var getDashboardStats2 = catchAsync(async (_req, res) => {
+  const result = await AdminService.getDashboardStats();
+  sendResponse(res, {
+    httpStatusCode: 200,
+    success: true,
+    message: "Dashboard stats retrieved successfully",
+    data: result
+  });
+});
+var broadcastPushNotification2 = catchAsync(
+  async (req, res) => {
+    const result = await AdminService.broadcastPushNotification(req.body);
+    sendResponse(res, {
+      httpStatusCode: 200,
+      success: true,
+      message: result.message,
+      data: { sent: result.sent, failed: result.failed }
+    });
+  }
+);
+var listAllIncidents2 = catchAsync(async (req, res) => {
+  const { page, limit, status, severity } = req.query;
+  const result = await AdminService.listAllIncidents({
+    page: page ? parseInt(page, 10) : void 0,
+    limit: limit ? parseInt(limit, 10) : void 0,
+    status,
+    severity
+  });
+  sendResponse(res, {
+    httpStatusCode: 200,
+    success: true,
+    message: "Incidents retrieved successfully",
+    data: result.incidents,
+    meta: result.meta
+  });
+});
+var updateIncidentStatus2 = catchAsync(async (req, res) => {
+  const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  const result = await AdminService.updateIncidentStatus(id, req.body.status);
+  sendResponse(res, {
+    httpStatusCode: 200,
+    success: true,
+    message: result.message
+  });
+});
+var deleteIncident4 = catchAsync(async (req, res) => {
+  const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  const result = await AdminService.deleteIncident(id);
+  sendResponse(res, {
+    httpStatusCode: 200,
+    success: true,
+    message: result.message
+  });
+});
+var AdminController = {
+  listAllUsers: listAllUsers2,
+  updateUserStatus: updateUserStatus2,
+  updateUserRole: updateUserRole2,
+  getDashboardStats: getDashboardStats2,
+  broadcastPushNotification: broadcastPushNotification2,
+  listAllIncidents: listAllIncidents2,
+  updateIncidentStatus: updateIncidentStatus2,
+  deleteIncident: deleteIncident4
+};
+
+// src/app/module/admin/admin.validation.ts
+import { z as z8 } from "zod";
+var updateUserStatusSchema = z8.object({
+  body: z8.object({
+    accountStatus: z8.enum(["ACTIVE", "BANNED", "DEACTIVATED", "DELETIONPENDING"], {
+      message: "Invalid account status"
+    })
+  })
+});
+var updateUserRoleSchema = z8.object({
+  body: z8.object({
+    role: z8.enum(["USER", "ADMIN", "SUPERADMIN", "SECURITYPERSON"], {
+      message: "Invalid role"
+    })
+  })
+});
+var broadcastSchema = z8.object({
+  body: z8.object({
+    title: z8.string().trim().min(1, "Title is required").max(200, "Title must not exceed 200 characters"),
+    body: z8.string().trim().min(1, "Body is required").max(2e3, "Body must not exceed 2000 characters")
+  })
+});
+var updateIncidentStatusSchema = z8.object({
+  body: z8.object({
+    status: z8.enum(["PENDING", "APPROVED", "RESOLVED", "REJECTED"], {
+      message: "Invalid incident status"
+    })
+  })
+});
+var AdminValidation = {
+  updateUserStatusSchema,
+  updateUserRoleSchema,
+  broadcastSchema,
+  updateIncidentStatusSchema
+};
+
+// src/app/module/admin/admin.route.ts
 var router11 = Router11();
-router11.use("/emergency-contact", EmergencyContactRoute);
-router11.use("/user", UserProfileRoute);
-router11.use("/security-personnel-profile", SecurityPersonnelProfileRoute);
-router11.use("/admin-profile", AdminProfileRoute);
-router11.use("/super-admin-profile", SuperAdminProfileRoute);
-router11.use("/incidents", IncidentReportingRoute);
-router11.use("/user", LocationRoute);
-router11.use("/incidents", ResponderRoute);
-router11.use("/app-version", AppVersionRoute);
-router11.use("/ml", MLRoute);
-var IndexRouters = router11;
+router11.get("/users", AdminController.listAllUsers);
+router11.patch(
+  "/users/:userId/status",
+  validateRequest(AdminValidation.updateUserStatusSchema),
+  AdminController.updateUserStatus
+);
+router11.patch(
+  "/users/:userId/role",
+  validateRequest(AdminValidation.updateUserRoleSchema),
+  AdminController.updateUserRole
+);
+router11.get("/stats", AdminController.getDashboardStats);
+router11.post(
+  "/broadcast",
+  validateRequest(AdminValidation.broadcastSchema),
+  AdminController.broadcastPushNotification
+);
+router11.get("/incidents", AdminController.listAllIncidents);
+router11.patch(
+  "/incidents/:id/status",
+  validateRequest(AdminValidation.updateIncidentStatusSchema),
+  AdminController.updateIncidentStatus
+);
+router11.delete("/incidents/:id", AdminController.deleteIncident);
+var AdminRoute = router11;
+
+// src/app/routes/index.ts
+var router12 = Router12();
+router12.use("/emergency-contact", EmergencyContactRoute);
+router12.use("/user", UserProfileRoute);
+router12.use("/security-personnel-profile", SecurityPersonnelProfileRoute);
+router12.use("/admin-profile", AdminProfileRoute);
+router12.use("/super-admin-profile", SuperAdminProfileRoute);
+router12.use("/incidents", IncidentReportingRoute);
+router12.use("/user", LocationRoute);
+router12.use("/incidents", ResponderRoute);
+router12.use("/app-version", AppVersionRoute);
+router12.use("/ml", MLRoute);
+router12.use("/admin", AdminRoute);
+var IndexRouters = router12;
 
 // src/app/module/auth/auth.route.ts
-import { Router as Router12 } from "express";
+import { Router as Router13 } from "express";
 
 // src/app/module/auth/auth.service.ts
 import { AccountStatus as AccountStatus3 } from "@prisma/client";
@@ -2492,15 +2897,15 @@ var AuthController = {
 };
 
 // src/app/module/auth/auth.validation.ts
-import { z as z8 } from "zod";
-var passwordSchema = z8.string("Password is required").min(8, "Password must be at least 8 characters long").max(64, "Password must not exceed 64 characters").regex(/[A-Z]/, "Password must contain at least one uppercase letter").regex(/[a-z]/, "Password must contain at least one lowercase letter").regex(/[0-9]/, "Password must contain at least one number").regex(
+import { z as z9 } from "zod";
+var passwordSchema = z9.string("Password is required").min(8, "Password must be at least 8 characters long").max(64, "Password must not exceed 64 characters").regex(/[A-Z]/, "Password must contain at least one uppercase letter").regex(/[a-z]/, "Password must contain at least one lowercase letter").regex(/[0-9]/, "Password must contain at least one number").regex(
   /[^A-Za-z0-9]/,
   "Password must contain at least one special character"
 );
-var emailSchema = z8.email("Please provide a valid email address").toLowerCase().trim();
-var registerSchema = z8.object({
-  body: z8.object({
-    name: z8.string("Name is required").trim().min(2, "Name must be at least 2 characters long").max(60, "Name must not exceed 60 characters").regex(
+var emailSchema = z9.email("Please provide a valid email address").toLowerCase().trim();
+var registerSchema = z9.object({
+  body: z9.object({
+    name: z9.string("Name is required").trim().min(2, "Name must be at least 2 characters long").max(60, "Name must not exceed 60 characters").regex(
       /^[a-zA-Z\s'-]+$/,
       "Name must only contain letters, spaces, hyphens or apostrophes"
     ),
@@ -2508,17 +2913,17 @@ var registerSchema = z8.object({
     password: passwordSchema
   })
 });
-var loginSchema = z8.object({
-  body: z8.object({
+var loginSchema = z9.object({
+  body: z9.object({
     email: emailSchema,
-    password: z8.string("Password is required").min(1, "Password is required")
+    password: z9.string("Password is required").min(1, "Password is required")
   })
 });
-var changePasswordSchema = z8.object({
-  body: z8.object({
-    currentPassword: z8.string("Current password is required").min(1, "Current password is required"),
+var changePasswordSchema = z9.object({
+  body: z9.object({
+    currentPassword: z9.string("Current password is required").min(1, "Current password is required"),
     newPassword: passwordSchema,
-    confirmNewPassword: z8.string("Please confirm your new password").min(1, "Please confirm your new password")
+    confirmNewPassword: z9.string("Please confirm your new password").min(1, "Please confirm your new password")
   })
 }).refine((data) => data.body.newPassword === data.body.confirmNewPassword, {
   message: "Passwords do not match",
@@ -2527,29 +2932,29 @@ var changePasswordSchema = z8.object({
   message: "New password must be different from the current password",
   path: ["body", "newPassword"]
 });
-var forgotPasswordSchema = z8.object({
-  body: z8.object({
+var forgotPasswordSchema = z9.object({
+  body: z9.object({
     email: emailSchema
   })
 });
-var resetPasswordSchema = z8.object({
-  body: z8.object({
-    token: z8.string("Reset token is required").min(1, "Reset token is required"),
+var resetPasswordSchema = z9.object({
+  body: z9.object({
+    token: z9.string("Reset token is required").min(1, "Reset token is required"),
     newPassword: passwordSchema,
-    confirmNewPassword: z8.string("Please confirm your new password").min(1, "Please confirm your new password")
+    confirmNewPassword: z9.string("Please confirm your new password").min(1, "Please confirm your new password")
   })
 }).refine((data) => data.body.newPassword === data.body.confirmNewPassword, {
   message: "Passwords do not match",
   path: ["body", "confirmNewPassword"]
 });
-var verifyEmailSchema = z8.object({
-  body: z8.object({
-    token: z8.string("Verification token is required").min(1, "Verification token is required")
+var verifyEmailSchema = z9.object({
+  body: z9.object({
+    token: z9.string("Verification token is required").min(1, "Verification token is required")
   })
 });
-var refreshTokenSchema = z8.object({
-  cookies: z8.object({
-    refreshToken: z8.string("Refresh token is required").min(1, "Refresh token is required")
+var refreshTokenSchema = z9.object({
+  cookies: z9.object({
+    refreshToken: z9.string("Refresh token is required").min(1, "Refresh token is required")
   })
 });
 var AuthValidation = {
@@ -2563,12 +2968,12 @@ var AuthValidation = {
 };
 
 // src/app/module/auth/auth.route.ts
-var router12 = Router12();
-router12.post("/register", validateRequest(AuthValidation.registerSchema), AuthController.registerUser);
-router12.post("/login", validateRequest(AuthValidation.loginSchema), AuthController.loginUser);
-router12.post("/send-otp", AuthController.sendOTP);
-router12.post("/verify-otp", AuthController.verifyOTP);
-router12.get("/social-login", catchAsync(async (req, res) => {
+var router13 = Router13();
+router13.post("/register", validateRequest(AuthValidation.registerSchema), AuthController.registerUser);
+router13.post("/login", validateRequest(AuthValidation.loginSchema), AuthController.loginUser);
+router13.post("/send-otp", AuthController.sendOTP);
+router13.post("/verify-otp", AuthController.verifyOTP);
+router13.get("/social-login", catchAsync(async (req, res) => {
   const provider = req.query.provider;
   const callbackURL = req.query.callbackURL;
   if (!provider || !callbackURL) {
@@ -2596,7 +3001,7 @@ router12.get("/social-login", catchAsync(async (req, res) => {
   }
   res.redirect(url);
 }));
-router12.get("/session", catchAsync(async (req, res) => {
+router13.get("/session", catchAsync(async (req, res) => {
   console.log("[auth.route /session] Incoming authorization:", req.headers.authorization);
   const session = await auth.api.getSession({
     headers: req.headers
@@ -2609,7 +3014,7 @@ router12.get("/session", catchAsync(async (req, res) => {
     data: session
   });
 }));
-var AuthRoutes = router12;
+var AuthRoutes = router13;
 
 // src/app.ts
 import { toNodeHandler } from "better-auth/node";
@@ -2617,7 +3022,7 @@ import { ZodError } from "zod";
 var app = express();
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin && (origin.includes("localhost") || origin.includes("ngrok-free.dev") || origin.startsWith("safetify://"))) {
+  if (origin && (origin.includes("localhost") || origin.includes("ngrok-free.dev") || origin.includes("safetify.vercel.app") || origin.startsWith("safetify://"))) {
     res.setHeader("Access-Control-Allow-Origin", origin);
   }
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
