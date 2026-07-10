@@ -28,18 +28,22 @@ const createIncident = catchAsync(async (req: Request, res: Response) => {
   // Trigger nearby alerts for high/critical incidents (now broadcast to all app users)
   if (result.severityLevel === "critical" || result.severityLevel === "high") {
     try {
-      // Fetch victim name
+      // Fetch victim name and push token
       const victimUser = await prisma.user.findUnique({
         where: { id: result.userId },
-        select: { name: true },
+        select: { name: true, pushToken: true },
       });
       const victimName = victimUser?.name || "Someone";
+      const victimPushToken = victimUser?.pushToken;
 
       // 1. Fetch other users with push tokens
       const otherUsers = await prisma.user.findMany({
         where: {
           id: { not: result.userId },
-          pushToken: { not: null },
+          pushToken: {
+            not: null,
+            ...(victimPushToken ? { not: victimPushToken } : {}),
+          },
         },
         select: { id: true, name: true, pushToken: true },
       });

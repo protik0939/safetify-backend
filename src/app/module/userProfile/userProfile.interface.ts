@@ -9,6 +9,8 @@ export interface ICreateUserProfile {
   image?: string;
   location?: string;
   contactNo?: string;
+  privacy?: string;
+  riskScore?: number;
 }
 
 export interface IUpdateUserProfile {
@@ -20,4 +22,6 @@ export interface IUpdateUserProfile {
   gender?: string;
   location?: string;
   contactNo?: string;
+  privacy?: string;
+  riskScore?: number;
 }

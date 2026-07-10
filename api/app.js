@@ -285,7 +285,9 @@ var createUserProfile = async (payload) => {
       bio: payload.bio,
       address: payload.address,
       bloodGroup: payload.bloodGroup,
-      gender: payload.gender
+      gender: payload.gender,
+      privacy: payload.privacy,
+      riskScore: payload.riskScore
     }
   });
   return userProfile;
@@ -398,7 +400,9 @@ var createUserProfileSchema = z2.object({
     gender: z2.string().trim().transform((val) => val.charAt(0).toUpperCase() + val.slice(1).toLowerCase()).refine(
       (val) => ["Male", "Female", "Others"].includes(val),
       { message: "Gender must be Male, Female, or Others" }
-    ).optional()
+    ).optional(),
+    privacy: z2.string().trim().optional(),
+    riskScore: z2.number().int().min(0).max(100).optional()
   })
 });
 var updateUserProfileSchema = z2.object({
@@ -416,7 +420,9 @@ var updateUserProfileSchema = z2.object({
     gender: z2.string().trim().transform((val) => val.charAt(0).toUpperCase() + val.slice(1).toLowerCase()).refine(
       (val) => ["Male", "Female", "Others"].includes(val),
       { message: "Gender must be Male, Female, or Others" }
-    ).optional()
+    ).optional(),
+    privacy: z2.string().trim().optional(),
+    riskScore: z2.number().int().min(0).max(100).optional()
   }).refine(
     (data) => Object.keys(data).length > 0,
     "At least one field must be provided for update"
@@ -1068,13 +1074,17 @@ var createIncident2 = catchAsync(async (req, res) => {
     try {
       const victimUser = await prisma.user.findUnique({
         where: { id: result.userId },
-        select: { name: true }
+        select: { name: true, pushToken: true }
       });
       const victimName = victimUser?.name || "Someone";
+      const victimPushToken = victimUser?.pushToken;
       const otherUsers = await prisma.user.findMany({
         where: {
           id: { not: result.userId },
-          pushToken: { not: null }
+          pushToken: {
+            not: null,
+            ...victimPushToken ? { not: victimPushToken } : {}
+          }
         },
         select: { id: true, name: true, pushToken: true }
       });
@@ -2281,7 +2291,12 @@ function verifyOTPToken(email, otp, token) {
       return false;
     }
     const expectedHash = crypto.createHmac("sha256", SECRET_KEY).update(`${tokenEmail}:${cleanOtp}:${expiresAt}`).digest("hex");
-    const isMatched = crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(expectedHash));
+    let isMatched = false;
+    try {
+      isMatched = crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(expectedHash));
+    } catch (e) {
+      isMatched = hash === expectedHash;
+    }
     if (!isMatched) {
       console.log(`[verifyOTPToken] HMAC hash mismatch`);
     }
@@ -2377,12 +2392,13 @@ var sendOTP = async (email) => {
   const expiresAt = new Date(Date.now() + 15 * 60 * 1e3);
   const otpToken = generateOTPToken(cleanEmail, otp, expiresAt);
   console.log(`[OTP] Email verification OTP code for ${cleanEmail} is: ${otp}`);
-  try {
-    const { sendVerificationEmail } = await import("./email-WRNNOK4R.js");
-    await sendVerificationEmail(cleanEmail, otp);
-  } catch (err) {
-    console.error(`[OTP] Failed to send verification email to ${cleanEmail}:`, err);
-  }
+  import("./email-AUW5Q5QH.js").then(({ sendVerificationEmail }) => {
+    sendVerificationEmail(cleanEmail, otp).catch((err) => {
+      console.error(`[OTP] Async verification email failed for ${cleanEmail}:`, err);
+    });
+  }).catch((err) => {
+    console.error(`[OTP] Failed to import email utility:`, err);
+  });
   const user = await prisma.user.findUnique({
     where: { email: cleanEmail }
   });
@@ -2391,13 +2407,13 @@ var sendOTP = async (email) => {
       const { sendPushNotification: sendPushNotification2 } = await import("./pushNotification-B3A6RBCJ.js");
       await sendPushNotification2(
         user.pushToken,
-        "\u{1F510} Safetify Verification Code",
-        `Your 8-digit verification code is: ${otp}. It expires in 15 minutes.`,
-        { type: "email_verification_otp", otp }
+        "\u{1F510} Verification Code Sent",
+        `A verification code has been sent to ${cleanEmail}. Please check your inbox.`,
+        { type: "email_verification_otp_sent" }
       );
-      console.log(`[OTP] Sent push notification with OTP to user ${user.id}`);
+      console.log(`[OTP] Sent secure push notification alert to user ${user.id}`);
     } catch (err) {
-      console.error(`[OTP] Failed to send push notification with OTP to ${cleanEmail}:`, err);
+      console.error(`[OTP] Failed to send secure push notification alert to ${cleanEmail}:`, err);
     }
   }
   return { message: "OTP sent successfully", token: otpToken };

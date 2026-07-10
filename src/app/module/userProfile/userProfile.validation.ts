@@ -43,6 +43,8 @@ const createUserProfileSchema = z.object({
         { message: "Gender must be Male, Female, or Others" }
       )
       .optional(),
+    privacy: z.string().trim().optional(),
+    riskScore: z.number().int().min(0).max(100).optional(),
   }),
 });
 
@@ -84,6 +86,8 @@ const updateUserProfileSchema = z.object({
           { message: "Gender must be Male, Female, or Others" }
         )
         .optional(),
+      privacy: z.string().trim().optional(),
+      riskScore: z.number().int().min(0).max(100).optional(),
     })
     .refine(
       (data) => Object.keys(data).length > 0,

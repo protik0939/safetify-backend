@@ -14,6 +14,8 @@ const createUserProfile = async (
       address: payload.address,
       bloodGroup: payload.bloodGroup,
       gender: payload.gender,
+      privacy: payload.privacy,
+      riskScore: payload.riskScore,
     },
   });
   return userProfile;

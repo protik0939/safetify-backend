@@ -28,6 +28,8 @@ model User {
   pushToken String?
 
   gender String?
+  privacy String?
+  riskScore Int @default(0)
 
   @@unique([email])
   @@map("user")

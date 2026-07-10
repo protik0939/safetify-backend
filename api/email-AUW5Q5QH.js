@@ -1,85 +1,75 @@
-import nodemailer from 'nodemailer';
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-let transporter: nodemailer.Transporter | null = null;
-
-export async function getTransporter(): Promise<nodemailer.Transporter> {
+// src/app/utills/email.ts
+import nodemailer from "nodemailer";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+var __filename = fileURLToPath(import.meta.url);
+var __dirname = path.dirname(__filename);
+var transporter = null;
+async function getTransporter() {
   if (transporter) return transporter;
-
-  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
-  const port = parseInt(process.env.SMTP_PORT || '587', 10);
-  const secure = process.env.SMTP_SECURE === 'true';
+  const host = process.env.SMTP_HOST || "smtp.gmail.com";
+  const port = parseInt(process.env.SMTP_PORT || "587", 10);
+  const secure = process.env.SMTP_SECURE === "true";
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
-
   if (user && pass) {
-    console.log('[Email] Initializing SMTP Transporter with configured credentials...');
+    console.log("[Email] Initializing SMTP Transporter with configured credentials...");
     transporter = nodemailer.createTransport({
       host,
       port,
       secure,
       auth: {
         user,
-        pass,
+        pass
       },
-      connectionTimeout: 3000,
-      greetingTimeout: 3000,
-      socketTimeout: 3000,
+      connectionTimeout: 3e3,
+      greetingTimeout: 3e3,
+      socketTimeout: 3e3,
       tls: {
-        rejectUnauthorized: false,
-      },
+        rejectUnauthorized: false
+      }
     });
   } else {
-    console.warn('[Email] SMTP credentials not provided. Falling back to Ethereal test account...');
+    console.warn("[Email] SMTP credentials not provided. Falling back to Ethereal test account...");
     try {
       const testAccount = await nodemailer.createTestAccount();
       transporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
+        host: "smtp.ethereal.email",
         port: 587,
         secure: false,
         auth: {
           user: testAccount.user,
-          pass: testAccount.pass,
-        },
+          pass: testAccount.pass
+        }
       });
       console.log(`[Email] Ethereal test account created: User=${testAccount.user}`);
     } catch (err) {
-      console.error('[Email] Failed to create Ethereal test account, email sending will log to console:', err);
+      console.error("[Email] Failed to create Ethereal test account, email sending will log to console:", err);
       transporter = {
-        sendMail: async (options: any) => {
-          console.log('[Email Dummy Transporter] Logged email content:', options);
-          return { messageId: 'dummy-id-' + Date.now() };
-        },
-      } as any;
+        sendMail: async (options) => {
+          console.log("[Email Dummy Transporter] Logged email content:", options);
+          return { messageId: "dummy-id-" + Date.now() };
+        }
+      };
     }
   }
-
-  return transporter!;
+  return transporter;
 }
-
-export async function sendVerificationEmail(to: string, otp: string): Promise<any> {
+async function sendVerificationEmail(to, otp) {
   const mailTransporter = await getTransporter();
-
-  const logoPath = path.join(__dirname, '../assets/logo.png');
+  const logoPath = path.join(__dirname, "../assets/logo.png");
   const attachments = [];
   const hasLogo = fs.existsSync(logoPath);
-
   if (hasLogo) {
     attachments.push({
-      filename: 'logo.png',
+      filename: "logo.png",
       path: logoPath,
-      cid: 'logo',
+      cid: "logo"
     });
   }
-
-  const fromName = process.env.SMTP_FROM_NAME || 'Safetify';
-  const fromEmail = process.env.SMTP_FROM_EMAIL || 'no-reply@safetify.com';
-
+  const fromName = process.env.SMTP_FROM_NAME || "Safetify";
+  const fromEmail = process.env.SMTP_FROM_EMAIL || "no-reply@safetify.com";
   const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
@@ -96,11 +86,7 @@ export async function sendVerificationEmail(to: string, otp: string): Promise<an
           <!-- Header (Logo & Brand Name) -->
           <tr>
             <td style="padding: 40px 40px 20px 40px; text-align: center;">
-              ${
-                hasLogo
-                  ? `<img src="cid:logo" alt="Safetify Logo" style="width: 72px; height: 72px; display: block; margin: 0 auto 12px auto; border-radius: 16px;" />`
-                  : ''
-              }
+              ${hasLogo ? `<img src="cid:logo" alt="Safetify Logo" style="width: 72px; height: 72px; display: block; margin: 0 auto 12px auto; border-radius: 16px;" />` : ""}
               <h1 style="margin: 0; font-size: 28px; font-weight: 800; color: #1e315f; letter-spacing: -0.5px;">Safetify</h1>
             </td>
           </tr>
@@ -126,7 +112,7 @@ export async function sendVerificationEmail(to: string, otp: string): Promise<an
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f8fafc; border-radius: 8px; padding: 16px; border: 1px solid #e2e8f0;">
                 <tr>
                   <td style="font-size: 13px; color: #475569; line-height: 1.5; text-align: left;">
-                    <strong>🛡️ Security Reminder:</strong> Safetify support will never ask for your verification code or password over email, phone, or chat. Please keep this code private and do not share it with anyone.
+                    <strong>\u{1F6E1}\uFE0F Security Reminder:</strong> Safetify support will never ask for your verification code or password over email, phone, or chat. Please keep this code private and do not share it with anyone.
                   </td>
                 </tr>
               </table>
@@ -154,21 +140,17 @@ export async function sendVerificationEmail(to: string, otp: string): Promise<an
 </body>
 </html>
   `;
-
   const mailOptions = {
     from: `"${fromName}" <${fromEmail}>`,
     to,
-    subject: `🔐 Verify your Safetify Account - ${otp}`,
+    subject: `\u{1F510} Verify your Safetify Account - ${otp}`,
     text: `Your Safetify 8-digit verification code is: ${otp}. It expires in 15 minutes.`,
     html: htmlContent,
-    attachments,
+    attachments
   };
-
   try {
     const info = await mailTransporter.sendMail(mailOptions);
     console.log(`[Email] Verification email successfully sent to ${to}. MessageId: ${info.messageId}`);
-    
-    // If Ethereal test mail was used, log the preview URL
     const testUrl = nodemailer.getTestMessageUrl(info);
     if (testUrl) {
       console.log(`[Email] Ethereal Preview URL: ${testUrl}`);
@@ -179,3 +161,7 @@ export async function sendVerificationEmail(to: string, otp: string): Promise<an
     throw error;
   }
 }
+export {
+  getTransporter,
+  sendVerificationEmail
+};

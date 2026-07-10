@@ -110,13 +110,14 @@ const sendOTP = async (email: string) => {
 
   console.log(`[OTP] Email verification OTP code for ${cleanEmail} is: ${otp}`);
 
-  // Send verification email using Nodemailer
-  try {
-    const { sendVerificationEmail } = await import("../../utills/email");
-    await sendVerificationEmail(cleanEmail, otp);
-  } catch (err) {
-    console.error(`[OTP] Failed to send verification email to ${cleanEmail}:`, err);
-  }
+  // Send verification email asynchronously so it doesn't block the request or cause timeouts
+  import("../../utills/email").then(({ sendVerificationEmail }) => {
+    sendVerificationEmail(cleanEmail, otp).catch((err) => {
+      console.error(`[OTP] Async verification email failed for ${cleanEmail}:`, err);
+    });
+  }).catch((err) => {
+    console.error(`[OTP] Failed to import email utility:`, err);
+  });
 
   const user = await prisma.user.findUnique({
     where: { email: cleanEmail },
@@ -127,13 +128,13 @@ const sendOTP = async (email: string) => {
       const { sendPushNotification } = await import("../../utills/pushNotification");
       await sendPushNotification(
         user.pushToken,
-        "🔐 Safetify Verification Code",
-        `Your 8-digit verification code is: ${otp}. It expires in 15 minutes.`,
-        { type: "email_verification_otp", otp }
+        "🔐 Verification Code Sent",
+        `A verification code has been sent to ${cleanEmail}. Please check your inbox.`,
+        { type: "email_verification_otp_sent" }
       );
-      console.log(`[OTP] Sent push notification with OTP to user ${user.id}`);
+      console.log(`[OTP] Sent secure push notification alert to user ${user.id}`);
     } catch (err) {
-      console.error(`[OTP] Failed to send push notification with OTP to ${cleanEmail}:`, err);
+      console.error(`[OTP] Failed to send secure push notification alert to ${cleanEmail}:`, err);
     }
   }
 

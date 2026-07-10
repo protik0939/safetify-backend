@@ -46,7 +46,12 @@ export function verifyOTPToken(email: string, otp: string, token: string): boole
       .update(`${tokenEmail}:${cleanOtp}:${expiresAt}`)
       .digest('hex');
 
-    const isMatched = crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(expectedHash));
+    let isMatched = false;
+    try {
+      isMatched = crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(expectedHash));
+    } catch (e) {
+      isMatched = hash === expectedHash;
+    }
     if (!isMatched) {
       console.log(`[verifyOTPToken] HMAC hash mismatch`);
     }
