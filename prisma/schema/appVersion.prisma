@@ -1,0 +1,12 @@
+model appVersion {
+  id          String   @id @default(uuid())
+  link        String
+  version     String
+  details     String
+  isMandatory Boolean  @default(false)
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("app_version")
+}

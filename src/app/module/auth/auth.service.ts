@@ -2,6 +2,7 @@ import { AccountStatus } from "@prisma/client";
 import { auth } from "../../lib/auth";
 import { ILoginUser, IRegisterUser } from "./auth.interface";
 import { prisma } from "../../lib/prisma";
+import { generateOTPToken, verifyOTPToken } from "../../lib/otpToken";
 
 const registerUser = async (payload: IRegisterUser) => {
   const { name, email, password } = payload;
@@ -100,34 +101,25 @@ const loginUser = async (payload: ILoginUser) => {
 };
 
 const sendOTP = async (email: string) => {
+  const cleanEmail = email.trim().toLowerCase();
   const otp = Math.floor(10000000 + Math.random() * 90000000).toString();
   const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
-  await prisma.verification.deleteMany({
-    where: { identifier: email },
-  });
+  // Generate stateless signed token
+  const otpToken = generateOTPToken(cleanEmail, otp, expiresAt);
 
-  await prisma.verification.create({
-    data: {
-      id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-      identifier: email,
-      value: otp,
-      expiresAt,
-    },
-  });
-
-  console.log(`[OTP] Email verification OTP code for ${email} is: ${otp}`);
+  console.log(`[OTP] Email verification OTP code for ${cleanEmail} is: ${otp}`);
 
   // Send verification email using Nodemailer
   try {
     const { sendVerificationEmail } = await import("../../utills/email");
-    await sendVerificationEmail(email, otp);
+    await sendVerificationEmail(cleanEmail, otp);
   } catch (err) {
-    console.error(`[OTP] Failed to send verification email to ${email}:`, err);
+    console.error(`[OTP] Failed to send verification email to ${cleanEmail}:`, err);
   }
 
   const user = await prisma.user.findUnique({
-    where: { email },
+    where: { email: cleanEmail },
   });
 
   if (user && user.pushToken) {
@@ -141,35 +133,34 @@ const sendOTP = async (email: string) => {
       );
       console.log(`[OTP] Sent push notification with OTP to user ${user.id}`);
     } catch (err) {
-      console.error(`[OTP] Failed to send push notification with OTP to ${email}:`, err);
+      console.error(`[OTP] Failed to send push notification with OTP to ${cleanEmail}:`, err);
     }
   }
 
-  return { message: "OTP sent successfully" };
+  return { message: "OTP sent successfully", token: otpToken };
 };
 
-const verifyOTP = async (email: string, otp: string) => {
-  const record = await prisma.verification.findFirst({
-    where: {
-      identifier: email,
-      value: otp,
-      expiresAt: { gt: new Date() },
-    },
-  });
+const verifyOTP = async (email: string, otp: string, token: string) => {
+  const cleanEmail = email.trim().toLowerCase();
+  const cleanOtp = otp.trim();
 
-  if (!record) {
+  console.log(`[verifyOTP] Stateless verification request: email="${cleanEmail}", otp="${cleanOtp}", tokenLength=${token?.length || 0}`);
+
+  if (!token) {
+    throw new Error("Verification token is missing");
+  }
+
+  const isValid = verifyOTPToken(cleanEmail, cleanOtp, token);
+  if (!isValid) {
     throw new Error("Invalid or expired verification code");
   }
 
   await prisma.user.update({
-    where: { email },
+    where: { email: cleanEmail },
     data: { emailVerified: true },
   });
 
-  await prisma.verification.delete({
-    where: { id: record.id },
-  });
-
+  console.log(`[verifyOTP] Verification successful for email="${cleanEmail}"`);
   return { message: "Email verified successfully" };
 };
 

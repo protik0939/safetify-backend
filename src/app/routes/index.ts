@@ -7,6 +7,8 @@ import { SuperAdminProfileRoute } from "../module/superAdminProfile/superAdminPr
 import { IncidentReportingRoute } from "../module/incidentReporting/incidentReporting.route";
 import { LocationRoute } from "../module/location/location.route";
 import { ResponderRoute } from "../module/responder/responder.route";
+import { AppVersionRoute } from "../module/appVersion/appVersion.route";
+import { MLRoute } from "../module/ml/ml.route";
 
 const router = Router();
 
@@ -19,5 +21,7 @@ router.use("/super-admin-profile", SuperAdminProfileRoute);
 router.use("/incidents", IncidentReportingRoute);
 router.use("/user", LocationRoute);
 router.use("/incidents", ResponderRoute);
+router.use("/app-version", AppVersionRoute);
+router.use("/ml", MLRoute);
 
 export const IndexRouters = router;

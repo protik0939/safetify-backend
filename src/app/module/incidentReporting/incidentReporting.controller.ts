@@ -226,7 +226,7 @@ const validateIncident = catchAsync(async (req: Request, res: Response) => {
 
   // 4. Send push notification to incident reporter (victim)
   try {
-    const incident = await prisma.incidentReporting.findUnique({
+    const incident = await prisma.incident.findUnique({
       where: { id: incidentId },
       select: {
         id: true,

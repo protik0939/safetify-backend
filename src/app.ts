@@ -1,9 +1,9 @@
-import express, { Application, Request, Response } from 'express';
+import express, { Application, Request, Response, NextFunction } from 'express';
 import { IndexRouters } from './app/routes';
 import { AuthRoutes } from './app/module/auth/auth.route';
 import { toNodeHandler } from 'better-auth/node';
 import { auth } from './app/lib/auth';
-import { NextFunction } from "express";
+import { ZodError } from 'zod';
 
 const app: Application = express();
 
@@ -87,13 +87,17 @@ app.use(
   ) => {
     console.error("Unhandled error:", err);
 
-    res.status(
-      (err as { statusCode?: number })?.statusCode || 500
-    ).json({
+    let statusCode = (err as { statusCode?: number })?.statusCode || 500;
+    let message = (err as { message?: string })?.message || "Internal server error";
+
+    if (err instanceof ZodError) {
+      statusCode = 400;
+      message = err.issues.map((issue) => issue.message).join('. ');
+    }
+
+    res.status(statusCode).json({
       success: false,
-      message:
-        (err as { message?: string })?.message ||
-        "Internal server error",
+      message,
     });
   }
 );
