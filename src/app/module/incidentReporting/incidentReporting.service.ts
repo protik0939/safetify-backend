@@ -1,6 +1,7 @@
 import { incident } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 import { ICreateIncident, IUpdateIncident } from "./incidentReporting.interface";
+import { broadcastToAdmins, closeActiveSOSRoom } from "../../websocket";
 
 const incidentInclude = {
   user: {
@@ -94,7 +95,14 @@ const createIncident = async (payload: ICreateIncident): Promise<any> => {
     });
   }
 
-  return getIncidentById(createdIncident.id);
+  const fullIncident = await getIncidentById(createdIncident.id);
+  try {
+    broadcastToAdmins({ type: "new_incident", data: { incident: fullIncident } });
+  } catch (err) {
+    console.error("[IncidentReportingService] Failed to broadcast to admins:", err);
+  }
+
+  return fullIncident;
 };
 
 const getAllIncidents = async (limit?: number, offset?: number): Promise<any[]> => {
@@ -155,6 +163,14 @@ const updateIncident = async (
     data: incidentData,
   });
 
+  if (incidentData.status === "resolved" || incidentData.status === "cancelled") {
+    try {
+      closeActiveSOSRoom(id);
+    } catch (wsErr) {
+      console.error(`[WS] Failed to close active SOS room on update:`, wsErr);
+    }
+  }
+
   if (images && Array.isArray(images)) {
     // Delete existing incident images (where helperValidationId is null)
     await prisma.incidentImage.deleteMany({
@@ -174,7 +190,14 @@ const updateIncident = async (
     }
   }
 
-  return getIncidentById(id);
+  const updatedIncident = await getIncidentById(id);
+  try {
+    broadcastToAdmins({ type: "incident_update", data: { incident: updatedIncident } });
+  } catch (err) {
+    console.error("[IncidentReportingService] Failed to broadcast to admins:", err);
+  }
+
+  return updatedIncident;
 };
 
 const deleteIncident = async (id: string): Promise<void> => {

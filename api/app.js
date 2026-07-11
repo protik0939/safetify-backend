@@ -1,10 +1,11 @@
 import {
+  broadcastRoomUpdate,
+  broadcastToAdmins,
+  prisma
+} from "./chunk-K4AFNUVY.js";
+import {
   sendPushNotification
 } from "./chunk-OKINERKX.js";
-import {
-  broadcastRoomUpdate,
-  prisma
-} from "./chunk-WBCNMNYU.js";
 
 // src/app.ts
 import express from "express";
@@ -982,7 +983,13 @@ var createIncident = async (payload) => {
       }))
     });
   }
-  return getIncidentById(createdIncident.id);
+  const fullIncident = await getIncidentById(createdIncident.id);
+  try {
+    broadcastToAdmins({ type: "new_incident", data: { incident: fullIncident } });
+  } catch (err) {
+    console.error("[IncidentReportingService] Failed to broadcast to admins:", err);
+  }
+  return fullIncident;
 };
 var getAllIncidents = async (limit, offset) => {
   const incidents = await prisma.incident.findMany({
@@ -1049,7 +1056,13 @@ var updateIncident = async (id, data) => {
       });
     }
   }
-  return getIncidentById(id);
+  const updatedIncident = await getIncidentById(id);
+  try {
+    broadcastToAdmins({ type: "incident_update", data: { incident: updatedIncident } });
+  } catch (err) {
+    console.error("[IncidentReportingService] Failed to broadcast to admins:", err);
+  }
+  return updatedIncident;
 };
 var deleteIncident = async (id) => {
   await prisma.incident.delete({
@@ -2766,7 +2779,7 @@ var loginUser = async (payload) => {
         data: { status: "resolved" }
       });
       try {
-        const { closeActiveSOSRoom } = await import("./websocket-Q5WPMNIA.js");
+        const { closeActiveSOSRoom } = await import("./websocket-Y5UUVGFA.js");
         closeActiveSOSRoom(incident.id);
       } catch (wsErr) {
         console.error(`[WS] Failed to close active SOS room on login:`, wsErr);
